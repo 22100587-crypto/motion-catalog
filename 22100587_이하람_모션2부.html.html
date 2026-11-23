@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>모션 카탈로그 2부</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@100..900&display=swap" rel="stylesheet">
+<style>
+/*
+VOICE: 수업 과제 노트 — 차분한 카탈로그, 데모가 주인공
+IDEA: 견본첩(swatch book). 카드 한 장 = 움직임 견본 하나 + 조절 다이얼
+PICTURE: 각 카드의 무대(stage)가 그림. 상단은 번호 칩 목록
+COLOUR and TYPE: 따뜻한 종이색 바탕, 흰 카드, 무대는 각자의 색. Noto Sans KR + Inter
+LAYOUT: 760px 한 단, 무대 아래 슬라이더 2열, 명세 문장 + 복사
+*/
+:root{color-scheme:light dark;--bg:light-dark(#f4f2ee,#111214);--card:light-dark(#fff,#1a1b1e);--ink:light-dark(#17171a,#eeece8);--mut:light-dark(#7d7b75,#96948f);--line:light-dark(#e6e3dc,#2b2c30);--chip:light-dark(#fff,#202125);--acc:#e0573a;--blue:#4a63e7}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:64px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Noto Sans KR",system-ui,sans-serif;overflow-x:clip;-webkit-font-smoothing:antialiased}
+.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .in{max-width:800px;margin:auto;padding:10px max(4vw,16px);display:flex;gap:12px;align-items:center;justify-content:space-between;font-size:14px}
+.top b{font-weight:700}.top span{color:var(--mut)}
+.wrap{max-width:800px;margin:auto;padding:0 max(4vw,16px) 80px}
+.hero{padding:48px 0 28px}
+.hero h1{font-size:clamp(30px,5vw,44px);line-height:1.1;margin:0 0 12px;letter-spacing:-.02em;font-weight:900;text-wrap:balance}
+.hero p{margin:0 0 6px;color:var(--mut);max-width:60ch}
+.hero p strong{color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.chips a{font:500 13px/1 Inter,sans-serif;padding:8px 9px;border:1px solid var(--line);border-radius:8px;background:var(--chip);color:var(--ink);text-decoration:none;min-width:38px;text-align:center}
+.chips a:hover,.chips a:focus-visible{border-color:var(--ink);outline:none}
+h2.cat{font-size:19px;margin:44px 0 12px;font-weight:900;letter-spacing:-.01em}
+h2.cat small{font:600 13px Inter,sans-serif;color:var(--acc);margin-right:8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin:0 0 16px}
+.card header{display:flex;align-items:baseline;gap:10px;margin:2px 2px 12px}
+.card .no{font:500 12px Inter,sans-serif;color:var(--mut)}
+.card h3{margin:0;font-size:16px;font-weight:700;flex:1}
+.card .hint{font-size:12px;color:var(--mut);white-space:nowrap}
+.stage{position:relative;height:340px;border-radius:12px;overflow:hidden;background:#f1efe9;color:#17171a;user-select:none;-webkit-user-select:none;touch-action:manipulation;isolation:isolate}
+.stage.dk{background:#141519;color:#f3f1ec}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.sc{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.sc>.tall{position:relative}
+.sc .view{position:sticky;top:0;height:340px;overflow:hidden}
+.tip{position:absolute;left:0;right:0;bottom:12px;text-align:center;font-size:12px;opacity:.6;pointer-events:none;z-index:5}
+.ctl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 22px;padding:14px 4px 4px}
+.ctl label{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:0 8px;font-size:13px;color:var(--mut)}
+.ctl label output{font:500 12px Inter,"Noto Sans KR",sans-serif;color:var(--ink);white-space:nowrap}
+.ctl input[type=range]{grid-column:1/-1;width:100%;height:28px;margin:0;accent-color:var(--acc);cursor:pointer}
+.spec{grid-column:1/-1;display:flex;gap:10px;align-items:flex-start;margin-top:8px;padding:10px 12px;background:color-mix(in srgb,var(--ink) 5%,transparent);border-radius:10px;font-size:13px;line-height:1.55}
+.spec p{margin:0;flex:1}
+.spec p b{font-weight:700;color:var(--acc)}
+.btns{display:flex;gap:6px;flex:none}
+.btn{font:500 12px "Noto Sans KR",sans-serif;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:0 10px;min-height:32px;cursor:pointer}
+.btn:hover,.btn:focus-visible{border-color:var(--ink);outline:none}
+.toTop{position:fixed;right:16px;bottom:16px;z-index:30;font:600 13px "Noto Sans KR";background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:10px 14px;text-decoration:none;box-shadow:0 4px 14px rgba(0,0,0,.08)}
+footer{color:var(--mut);font-size:13px;text-align:center;padding:30px 0}
+@media(max-width:600px){.ctl{grid-template-columns:minmax(0,1fr)}.stage{height:300px}.sc .view{height:300px}.card{padding:12px}.top span{display:none}.spec{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="top"><div class="in"><b>모션 카탈로그 · 2부</b><span>각 카드의 슬라이더로 값을 바꿔 보세요</span></div></div>
+<main class="wrap">
+<section class="hero">
+<h1>모션 46가지, 값을 돌려 보는 견본첩</h1>
+<p>각 무대를 직접 만져 보고, 아래 슬라이더로 <strong>속도 · 거리 · 세기</strong>를 바꾸면 결과가 바로 달라집니다.</p>
+<p>슬라이더 아래의 <strong>명세 문장</strong>은 지금 값 그대로 갱신됩니다. 복사해서 AI에 넣고 같은 움직임이 나오는지 비교해 보세요.</p>
+<nav class="chips" id="chips" aria-label="모션 번호"></nav>
+</section>
+<div id="list"></div>
+<footer>스마트 인터랙션 디자인 · 모션 카탈로그 2부 (52–97) 개인 과제</footer>
+</main>
+<a class="toTop" href="#">↑ 목록</a>
+<script>
+{
+const D=[];const def=o=>D.push(o);
+const CATS={K:'글자가 움직인다',L:'형태가 바뀐다',M:'그려지고 자란다',N:'무게가 있다',O:'빛과 재질',P:'공간을 움직인다',Q:'화면이 바뀐다',R:'터지고 보상한다',S:'질감과 스타일'};
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v)),lerp=(a,b,t)=>a+(b-a)*t,ease=t=>1-Math.pow(1-t,3),easeIO=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2,rnd=(a,b)=>a+Math.random()*(b-a),TAU=Math.PI*2;
+const h=(tag,cls,html,parent)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;if(parent)parent.appendChild(e);return e};
+const backOut=(s)=>t=>{const c=1.70158*s,c3=c+1;return 1+c3*Math.pow(t-1,3)+c*Math.pow(t-1,2)};
+const fmtNum=(v,step)=>{const d=step<1?Math.min(3,String(step).split('.')[1]?.length||1):0;return (+v).toFixed(d)};
+const RT=[];
+function makeApi(R){
+  return {
+    frame(fn){R.frames.push(fn)},
+    on(el,ev,fn,opt){el.addEventListener(ev,fn,opt);R.clean.push(()=>el.removeEventListener(ev,fn,opt))},
+    later(fn,ms){const id=setTimeout(fn,ms);R.clean.push(()=>clearTimeout(id));return id},
+    clean(fn){R.clean.push(fn)},
+    pt(e,el){const r=(el||R.stage).getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top,w:r.width,h:r.height}},
+    scroll(mult=4,tipText='아래로 스크롤해 보세요 ↓'){
+      const sc=h('div','sc',null,R.stage),tall=h('div','tall',null,sc);tall.style.height=(mult*100)+'%';
+      const view=h('div','view',null,tall);if(tipText)h('div','tip',tipText,view);
+      return{sc,view,p:()=>{const m=sc.scrollHeight-sc.clientHeight;return m>0?clamp(sc.scrollTop/m,0,1):0}};
+    },
+    canvas(parent){
+      parent=parent||R.stage;const cv=h('canvas',null,null,parent),ctx=cv.getContext('2d');const o={cv,ctx,W:1,H:1,dpr:1};
+      const fit=()=>{const r=parent.getBoundingClientRect();o.dpr=Math.min(2,window.devicePixelRatio||1);o.W=Math.max(1,r.width);o.H=Math.max(1,r.height);cv.width=Math.round(o.W*o.dpr);cv.height=Math.round(o.H*o.dpr);ctx.setTransform(o.dpr,0,0,o.dpr,0,0);o.onfit&&o.onfit()};
+      fit();const ro=new ResizeObserver(fit);ro.observe(parent);R.clean.push(()=>ro.disconnect());return o;
+    }
+  };
+}
+function mount(R){
+  R.clean.forEach(f=>{try{f()}catch(e){}});R.clean=[];R.frames=[];R.stage.innerHTML='';
+  R.stage.className='stage'+(R.d.dark?' dk':'');
+  if(R.d.bg)R.stage.style.background=R.d.bg;
+  try{R.d.mount(R.stage,R.P,makeApi(R))}catch(err){console.error('demo '+R.d.n,err);R.stage.innerHTML='<div class="tip">이 데모를 불러오지 못했어요</div>'}
+}
+function specHTML(R){
+  let s=R.d.spec(R.P);
+  return s.replace(/\{([^}]+)\}/g,'<b>$1</b>');
+}
+function build(){
+  const list=document.getElementById('list'),chips=document.getElementById('chips');let cat='';
+  chips.innerHTML=D.map(d=>`<a href="#m${d.n}">${d.n}</a>`).join('');
+  for(const d of D){
+    if(d.cat!==cat){cat=d.cat;h('h2','cat',`<small>${cat}</small>${CATS[cat]}`,list)}
+    const card=h('article','card',null,list);card.id='m'+d.n;
+    card.innerHTML=`<header><span class="no">${d.n}</span><h3>${d.title}</h3><span class="hint">${d.hint}</span></header><div class="stage"></div><div class="ctl"></div>`;
+    const R={d,card,stage:card.querySelector('.stage'),P:{},frames:[],clean:[],vis:false};
+    const ctl=card.querySelector('.ctl');
+    const lab=(p,v)=>p[7]&&p[7].L?p[7].L[Math.round(v)]:fmtNum(v,p[4])+(p[6]||'');
+    let tmr;
+    d.params.forEach(p=>{R.P[p[0]]=p[5];
+      const l=h('label',null,`<span>${p[1]}</span><output></output><input type="range" min="${p[2]}" max="${p[3]}" step="${p[4]}" value="${p[5]}" aria-label="${p[1]}">`,ctl);
+      const inp=l.querySelector('input'),out=l.querySelector('output');out.textContent=lab(p,p[5]);
+      inp.addEventListener('input',()=>{R.P[p[0]]=+inp.value;out.textContent=lab(p,+inp.value);sp.innerHTML=specHTML(R);
+        if(p[7]&&p[7].r){clearTimeout(tmr);tmr=setTimeout(()=>mount(R),160)} R.onParam&&R.onParam(p[0])});
+    });
+    const spec=h('div','spec',`<p></p><div class="btns"><button class="btn" data-a="copy">명세 복사</button><button class="btn" data-a="reset" title="값과 무대를 처음으로">↺ 처음</button></div>`,ctl);
+    const sp=spec.querySelector('p');sp.innerHTML=specHTML(R);
+    spec.addEventListener('click',async e=>{const a=e.target.dataset.a;if(!a)return;
+      if(a==='copy'){const t=d.spec(R.P).replace(/[{}]/g,'');try{await navigator.clipboard.writeText(t);e.target.textContent='복사됨'}catch(_){const r=document.createRange();r.selectNodeContents(sp);const s=getSelection();s.removeAllRanges();s.addRange(r);e.target.textContent='선택됨 · ⌘C'}setTimeout(()=>e.target.textContent='명세 복사',1400)}
+      if(a==='reset'){d.params.forEach(p=>{R.P[p[0]]=p[5]});ctl.querySelectorAll('label').forEach((l,i)=>{const p=d.params[i];l.querySelector('input').value=p[5];l.querySelector('output').textContent=lab(p,p[5])});sp.innerHTML=specHTML(R);mount(R)}
+    });
+    RT.push(R);mount(R);
+  }
+  const io=new IntersectionObserver(es=>es.forEach(en=>{const R=RT.find(r=>r.card===en.target);if(R)R.vis=en.isIntersecting}),{rootMargin:'100px'});
+  RT.forEach(R=>io.observe(R.card));
+  let last=performance.now();
+  const loop=t=>{const dt=Math.min(.05,(t-last)/1000);last=t;const s=t/1000;
+    for(const R of RT){if(!R.vis)continue;for(const f of R.frames){try{f(s,dt)}catch(err){console.error('frame '+R.d.n,err);R.frames=[]}}}
+    requestAnimationFrame(loop)};
+  requestAnimationFrame(loop);
+}
+/* ───────── K 글자가 움직인다 ───────── */
+def({n:52,cat:'K',title:'한 자씩 조립',hint:'스크롤해 보기',
+params:[['dist','흩어진 거리',40,400,10,180,'px'],['rot','최대 회전',0,180,5,90,'°'],['stag','글자 사이 시차',0,0.9,0.05,0.5,''],['size','글자 크기',24,80,2,52,'px']],
+spec:P=>`스크롤하는 동안 문장의 글자들이 최대 {${P.dist}px} 떨어진 곳에서 {${P.rot}°}까지 돌아간 채로 출발해, 앞 글자부터 시차 {${P.stag}}만큼 늦게 차례로 제자리에 맞춰진다. 글자 크기 {${P.size}px}.`,
+mount(st,P,api){const s=api.scroll(4);const v=s.view;v.style.cssText+='display:grid;place-items:center';
+  const line=h('div',null,null,v);line.style.cssText='font-weight:900;letter-spacing:-.02em;white-space:nowrap';
+  const txt='움직임은 문장이 된다';const L=[...txt].map(c=>{const e=h('span',null,c===' '?'&nbsp;':c,line);e.style.display='inline-block';const a=rnd(0,TAU);return{e,dx:Math.cos(a),dy:Math.sin(a),r:rnd(-1,1),k:rnd(.6,1)}});
+  api.frame(()=>{const p=s.p(),n=L.length,sg=P.stag;line.style.fontSize=P.size+'px';
+    L.forEach((o,i)=>{const t=clamp((p*1.15-i/n*sg)/(1-sg+1e-3),0,1),e=1-ease(t);o.e.style.transform=`translate(${o.dx*P.dist*o.k*e}px,${o.dy*P.dist*o.k*e}px) rotate(${o.r*P.rot*e}deg)`;o.e.style.opacity=.15+.85*(1-e)})})}});
+
+def({n:53,cat:'K',title:'한 단어만 바뀌는 문장',hint:'잠시 지켜보기',bg:'#faf8f4',
+params:[['hold','한 단어가 머무는 시간',0.6,5,0.1,2.2,'초'],['dur','바뀌는 시간',100,1200,20,520,'ms'],['dy','오르내리는 거리',0,60,2,22,'px'],['blur','바뀔 때 흐림',0,14,1,5,'px']],
+spec:P=>`문장 "우리는 ___ 화면을 만듭니다"에서 가운데 단어만 {${P.hold}초}마다 바뀐다. 기존 단어는 위로 {${P.dy}px} 올라가며 {${P.blur}px} 흐려져 사라지고, 새 단어가 아래에서 올라온다. 전환 {${P.dur}ms}, 단어 폭도 같은 시간에 늘고 준다.`,
+mount(st,P,api){st.style.display='grid';st.style.placeItems='center';
+  const box=h('div',null,`<div style="font:600 11px Inter;letter-spacing:.2em;opacity:.45;margin-bottom:12px">STUDIO NOTE</div>`,st);box.style.textAlign='center';
+  const line=h('div',null,null,box);line.style.cssText='font-size:clamp(22px,4.4vw,34px);font-weight:900;letter-spacing:-.02em;white-space:nowrap';
+  line.innerHTML='우리는 <span class="w" style="display:inline-block;position:relative;vertical-align:bottom;height:1.3em;color:#e0573a"></span> 화면을 만듭니다';
+  h('div',null,'작은 팀이 천천히, 오래 다듬습니다.',box).style.cssText='font-size:13px;opacity:.55;margin-top:10px';
+  const W=['오래 쓰는','빠르게 읽히는','손에 붙는','조용한','다정한'];const slot=line.querySelector('.w');let i=0,acc=0;
+  const meas=t=>{const m=h('span',null,t,line);m.style.cssText='position:absolute;visibility:hidden;white-space:nowrap';const w=m.offsetWidth;m.remove();return w};
+  const mk=t=>{const e=h('span',null,t,slot);e.style.cssText='position:absolute;left:0;top:0;white-space:nowrap';return e};
+  let cur=mk(W[0]);slot.style.width=meas(W[0])+'px';
+  api.frame((t,dt)=>{acc+=dt;if(acc<P.hold)return;acc=0;i=(i+1)%W.length;const d=P.dur+'ms',tr=`transform ${d} cubic-bezier(.3,.7,.2,1),opacity ${d},filter ${d}`;
+    const old=cur;old.style.transition=tr;old.style.transform=`translateY(${-P.dy}px)`;old.style.opacity=0;old.style.filter=`blur(${P.blur}px)`;setTimeout(()=>old.remove(),P.dur+50);
+    cur=mk(W[i]);cur.style.transform=`translateY(${P.dy}px)`;cur.style.opacity=0;cur.style.filter=`blur(${P.blur}px)`;void cur.offsetWidth;cur.style.transition=tr;cur.style.transform='none';cur.style.opacity=1;cur.style.filter='none';
+    slot.style.transition=`width ${d} cubic-bezier(.3,.7,.2,1)`;slot.style.width=meas(W[i])+'px'})}});
+
+def({n:54,cat:'K',title:'글자 늘어남·굵기 출렁임',hint:'커서를 좌우로',dark:true,
+params:[['wmin','가장 가는 굵기',100,800,50,200,''],['wmax','가장 굵은 굵기',300,900,50,900,''],['spread','영향 범위',40,400,10,150,'px'],['stretch','가로 늘림',1,2,0.05,1.35,'배'],['follow','따라오는 속도',0.03,1,0.01,0.15,'']],
+spec:P=>`커서가 "FLEX" 위를 좌우로 지나가면, 커서와 가까운 글자일수록 굵기가 {${P.wmin}}에서 {${P.wmax}}까지 굵어지고 가로로 {${P.stretch}배}까지 늘어난다. 영향 범위 {${P.spread}px}, 값은 매 프레임 {${P.follow}} 비율로 부드럽게 따라온다.`,
+mount(st,P,api){st.style.display='grid';st.style.placeItems='center';
+  const line=h('div',null,null,st);line.style.cssText='font:400 clamp(70px,15vw,130px)/1 Inter,sans-serif;white-space:nowrap;display:flex';
+  h('div','tip','커서를 좌우로 움직여 보세요',st);
+  const L=[...'FLEX'].map(c=>{const e=h('span',null,c,line);e.style.cssText='display:inline-block;transform-origin:center';return{e,w:P.wmin,s:1}});
+  let mx=-999;api.on(st,'pointermove',e=>mx=api.pt(e).x);api.on(st,'pointerleave',()=>mx=-999);
+  api.frame(()=>{const r=st.getBoundingClientRect();L.forEach(o=>{const b=o.e.getBoundingClientRect(),cx=b.left+b.width/2-r.left;const k=Math.exp(-((cx-mx)**2)/(2*P.spread*P.spread));
+    o.w=lerp(o.w,lerp(P.wmin,Math.max(P.wmin,P.wmax),k),P.follow);o.s=lerp(o.s,lerp(1,P.stretch,k),P.follow);o.e.style.fontWeight=Math.round(o.w);o.e.style.transform=`scaleX(${o.s})`;o.e.style.margin=`0 ${(o.s-1)*24}px`})})}});
+
+def({n:55,cat:'K',title:'틀을 넘치는 큰 글자',hint:'스크롤해 보기',
+params:[['max','끝 크기',1,4,0.1,2.4,'배'],['tilt','틀 기울기',-15,15,1,-6,'°'],['spin','글자 회전',-30,30,1,8,'°']],
+spec:P=>`스크롤에 따라 "가득" 글자가 {${(0.4).toFixed(1)}배}에서 {${P.max}배}까지 커지며 {${P.tilt}°} 기울어진 틀 밖으로 넘친다. 커지는 동안 글자도 {${P.spin}°} 돈다.`,
+mount(st,P,api){const s=api.scroll(4);const v=s.view;
+  const fr=h('div',null,null,v),tx=h('div',null,'가득',v);fr.style.cssText='position:absolute;left:50%;top:50%;width:300px;height:180px;border:3px solid #17171a;margin:-90px 0 0 -150px';
+  tx.style.cssText='position:absolute;left:50%;top:50%;font-weight:900;font-size:110px;line-height:1;color:#e0573a;transform-origin:center;white-space:nowrap;letter-spacing:-.04em';
+  api.frame(()=>{const p=easeIO(s.p());fr.style.transform=`rotate(${P.tilt}deg)`;tx.style.transform=`translate(-50%,-50%) rotate(${P.tilt+P.spin*p}deg) scale(${lerp(.4,P.max,p)})`})}});
+
+def({n:56,cat:'K',title:'흩어졌다 모이는 글자',hint:'단어 누르기',dark:true,
+params:[['force','흩어지는 거리',40,400,10,220,'px'],['spin','회전',0,720,10,200,'°'],['hold','흩어진 채 머묾',0,2,0.05,0.5,'초'],['back','돌아오는 시간',0.2,2.5,0.05,0.9,'초']],
+spec:P=>`"타이포그래피"를 누르면 글자들이 사방 최대 {${P.force}px}까지 {${P.spin}°} 돌며 튀어 나갔다가, {${P.hold}초} 머문 뒤 {${P.back}초} 동안 살짝 넘치며 제자리로 모인다.`,
+mount(st,P,api){st.style.display='grid';st.style.placeItems='center';st.style.cursor='pointer';
+  const line=h('div',null,null,st);line.style.cssText='font-size:clamp(48px,10vw,76px);font-weight:900;letter-spacing:-.02em';h('div','tip','눌러 보세요',st);
+  const L=[...'타이포그래피'].map((c,i)=>{const e=h('span',null,c,line);e.style.cssText=`display:inline-block;color:${i%2?'#f3f1ec':'#f5c76b'}`;return e});
+  let busy=0;api.on(st,'click',()=>{if(busy)return;busy=1;
+    L.forEach(e=>{const a=rnd(0,TAU),d=P.force*rnd(.5,1);e.style.transition='transform .45s cubic-bezier(.2,.8,.3,1)';e.style.transform=`translate(${Math.cos(a)*d}px,${Math.sin(a)*d}px) rotate(${rnd(-1,1)*P.spin}deg) scale(${rnd(.7,1.3)})`});
+    api.later(()=>{L.forEach((e,i)=>{e.style.transition=`transform ${P.back}s cubic-bezier(.34,1.56,.64,1) ${i*0.03}s`;e.style.transform='none'});api.later(()=>busy=0,P.back*1000+200)},450+P.hold*1000)})}});
+
+def({n:57,cat:'K',title:'원을 도는 글자 띠',hint:'스크롤해 보기',dark:true,
+params:[['speed','기본 회전 속도',0,90,1,12,'°/초'],['boost','스크롤 가속',0,20,0.5,6,''],['rings','띠 개수',1,3,1,3,'개',{r:1}],['size','글자 크기',8,20,1,13,'px']],
+spec:P=>`가운데 점을 중심으로 {${P.rings}개}의 글자 띠가 원을 그리며 서로 반대 방향으로 돈다. 평소엔 초당 {${P.speed}°}, 스크롤하면 스크롤한 양에 {${P.boost}}를 곱한 만큼 빨라졌다가 서서히 원래 속도로 돌아온다. 글자 {${P.size}px}.`,
+mount(st,P,api){const s=api.scroll(8,null);const v=s.view;
+  const T=['SMART INTERACTION DESIGN ✦ ','스마트 인터랙션 디자인 · ','MOTION · TYPE · RHYTHM · '],C=['#f3f1ec','#e8794f','#8ea2ff'],R=[130,100,72];
+  let svg=`<svg viewBox="-170 -170 340 340" style="position:absolute;inset:0;width:100%;height:100%"><circle r="5" fill="#e0573a"/>`;
+  for(let i=0;i<P.rings;i++){const r=R[i],len=TAU*r;svg+=`<g class="rg"><path id="p57${i}" d="M ${-r} 0 a ${r} ${r} 0 1 1 ${2*r} 0 a ${r} ${r} 0 1 1 ${-2*r} 0" fill="none"/><text fill="${C[i]}" font-family="Inter,Noto Sans KR" font-weight="700"><textPath href="#p57${i}" textLength="${len-4}" lengthAdjust="spacing">${T[i].repeat(i==0?2:i==1?2:3)}</textPath></text></g>`}
+  v.insertAdjacentHTML('beforeend',svg+'</svg>');h('div','tip','안에서 스크롤해 보세요',v);
+  const G=[...v.querySelectorAll('.rg')],tx=[...v.querySelectorAll('text')];let a=0,vel=0,ls=s.sc.scrollTop;
+  api.frame((t,dt)=>{const d=s.sc.scrollTop-ls;ls=s.sc.scrollTop;vel+=d*P.boost*.6;vel*=Math.pow(.05,dt);a+=(P.speed+vel)*dt;
+    tx.forEach((e,i)=>e.setAttribute('font-size',P.size-(i*1.5)));G.forEach((g,i)=>g.setAttribute('transform',`rotate(${i%2?-a*1.2:a})`))})}});
+
+def({n:58,cat:'K',title:'먹물 번짐 글씨',hint:'화면 누르기',bg:'radial-gradient(ellipse at center,#f6f1e6,#e9e1cf)',
+params:[['blur','처음 번짐',2,40,1,18,'px'],['dur','번지는 시간',0.3,4,0.1,1.6,'초'],['size','글자 크기',30,140,2,72,'px'],['spread','얼룩 크기',0,320,10,150,'px']],
+spec:P=>`종이를 누른 자리에 먹 얼룩이 {${P.spread}px}까지 번지고, 그 위로 "스미다" 글씨가 {${P.blur}px} 흐린 상태에서 {${P.dur}초} 동안 또렷해진다. 글자 크기 {${P.size}px}.`,
+mount(st,P,api){st.style.cursor='pointer';const id='ink58'+Math.random().toString(36).slice(2,6);
+  st.insertAdjacentHTML('beforeend',`<svg width="0" height="0" style="position:absolute"><filter id="${id}"><feTurbulence type="fractalNoise" baseFrequency=".04" numOctaves="3" seed="3"/><feDisplacementMap in="SourceGraphic" scale="22"/></filter></svg>`);
+  h('div','tip','눌러 보세요',st);
+  api.on(st,'click',e=>{const p=api.pt(e);const blot=h('div',null,null,st),w=h('div',null,'스미다',st);
+    blot.style.cssText=`position:absolute;left:${p.x}px;top:${p.y}px;width:${P.spread}px;height:${P.spread}px;margin:${-P.spread/2}px;border-radius:50%;background:radial-gradient(circle,rgba(30,28,34,.35),rgba(30,28,34,.12) 55%,transparent 70%);filter:url(#${id}) blur(2px);transform:scale(.05);transition:transform ${P.dur}s cubic-bezier(.2,.7,.2,1),opacity 3s ${P.dur+1.5}s`;
+    w.style.cssText=`position:absolute;left:${p.x}px;top:${p.y}px;transform:translate(-50%,-50%) scale(1.25);font:900 ${P.size}px "Noto Sans KR";color:#1d1b22;white-space:nowrap;filter:blur(${P.blur}px);opacity:0;transition:filter ${P.dur}s ease-out,opacity ${P.dur*.6}s,transform ${P.dur}s cubic-bezier(.2,.7,.2,1)`;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{blot.style.transform='scale(1)';w.style.filter='blur(0)';w.style.opacity=1;w.style.transform='translate(-50%,-50%) scale(1)'}));
+    api.later(()=>{w.style.transition='opacity 1.5s';w.style.opacity=0;blot.style.opacity=0},(P.dur+1.6)*1000);api.later(()=>{w.remove();blot.remove()},(P.dur+5)*1000)})}});
+
+def({n:59,cat:'K',title:'깨졌다 복구되는 글자',hint:'커서 올리기',dark:true,bg:'#0f0f12',
+params:[['dur','깨지는 시간',0.1,2,0.05,0.4,'초'],['amp','흔들림',0,40,1,10,'px'],['slices','조각 수',2,20,1,8,'개'],['rgb','색 분리',0,20,1,5,'px']],
+spec:P=>`커서를 "GLITCH" 위에 올리면 {${P.dur}초} 동안 글자가 가로 {${P.slices}개} 조각으로 잘려 최대 {${P.amp}px}씩 좌우로 어긋나고, 빨강·청록 사본이 {${P.rgb}px} 벌어진다. 시간이 지나면 원래 모양으로 복구된다.`,
+mount(st,P,api){st.style.display='grid';st.style.placeItems='center';
+  const box=h('div',null,null,st);box.style.cssText='position:relative;font:900 clamp(60px,13vw,104px)/1 Inter;letter-spacing:-.02em';
+  const mk=(c,b)=>{const e=h('div',null,'GLITCH',box);e.style.cssText=`color:${c};${b?'position:absolute;inset:0;mix-blend-mode:screen;opacity:0':'position:relative'}`;return e};
+  const r=mk('#ff3b5c',1),c=mk('#22e3ff',1),m=mk('#f3f1ec');h('div','tip','텍스트 위에 커서를 올리면 잠시 글리치가 일어납니다',st);
+  let until=0;api.on(box,'pointerenter',()=>until=performance.now()+P.dur*1000);api.on(box,'click',()=>until=performance.now()+P.dur*1000);
+  const sl=()=>{let s=[],y=0;const n=P.slices;for(let i=0;i<n;i++){const y2=Math.min(100,y+rnd(.5,1.5)*100/n);if(Math.random()<.6)s.push([y,y2,rnd(-1,1)*P.amp]);y=y2}return s};
+  api.frame(()=>{const on=performance.now()<until;if(!on){r.style.opacity=c.style.opacity=0;m.style.transform='none';m.style.clipPath='none';return}
+    const s=sl();const poly=s.map(([a,b,dx])=>`inset(${a}% 0 ${100-b}% 0)`);const pick=s[Math.floor(Math.random()*s.length)]||[0,100,0];
+    m.style.transform=`translateX(${rnd(-.3,.3)*P.amp}px)`;r.style.opacity=c.style.opacity=.9;
+    r.style.clipPath=`inset(${pick[0]}% 0 ${100-pick[1]}% 0)`;r.style.transform=`translate(${-P.rgb+pick[2]}px,0)`;
+    const p2=s[Math.floor(Math.random()*s.length)]||[0,100,0];c.style.clipPath=`inset(${p2[0]}% 0 ${100-p2[1]}% 0)`;c.style.transform=`translate(${P.rgb+p2[2]}px,0)`})}});
+/* ───────── L 형태가 바뀐다 ───────── */
+def({n:60,cat:'L',title:'알약 하나의 UI 변신',hint:'누르기',bg:'#f2f2f4',
+params:[['dur','변신 시간',150,1400,10,520,'ms'],['bounce','튕김',0,1,0.05,0.4,''],['auto','자동 변신 간격',0,4,0.5,0,'초'],['delay','내용 등장 지연',0,400,10,120,'ms']],
+spec:P=>`검은 알약을 누를 때마다 뮤직 플레이어 → 볼륨 → 토글 → 차트 카드 → 알약 순으로 크기와 모서리가 {${P.dur}ms} 동안 바뀐다. 튕김 {${P.bounce}}로 살짝 넘쳤다 자리 잡고, 안의 내용은 {${P.delay}ms} 늦게 나타난다.${P.auto?` {${P.auto}초}마다 자동으로 다음 상태가 된다.`:''}`,
+mount(st,P,api){st.style.display='grid';st.style.placeItems='center';
+  const S=[{n:'알약',w:120,h:40,r:20,c:'<div style="display:flex;gap:6px;justify-content:center;align-items:center;height:100%"><i style="width:6px;height:6px;border-radius:9px;background:#fff"></i><i style="width:6px;height:6px;border-radius:9px;background:#fff"></i><i style="width:6px;height:6px;border-radius:9px;background:#fff"></i></div>'},
+  {n:'뮤직 플레이어',w:320,h:84,r:26,c:'<div style="display:flex;gap:12px;align-items:center;height:100%;padding:0 14px"><div style="width:54px;height:54px;border-radius:14px;background:linear-gradient(135deg,#e0573a,#f5c76b)"></div><div style="flex:1;text-align:left"><div style="font-weight:700;font-size:14px">여름 산책</div><div style="font-size:12px;opacity:.6">Studio Loop</div></div><div style="display:flex;gap:3px;align-items:flex-end;height:22px"><i style="width:3px;height:60%;background:#f5c76b"></i><i style="width:3px;height:100%;background:#f5c76b"></i><i style="width:3px;height:40%;background:#f5c76b"></i><i style="width:3px;height:80%;background:#f5c76b"></i></div></div>'},
+  {n:'볼륨',w:250,h:52,r:26,c:'<div style="display:flex;gap:12px;align-items:center;height:100%;padding:0 18px"><span style="font-size:13px">🔈</span><div style="flex:1;height:6px;border-radius:9px;background:#333"><div style="width:64%;height:100%;border-radius:9px;background:#fff"></div></div></div>'},
+  {n:'토글',w:150,h:64,r:32,c:'<div style="display:flex;align-items:center;justify-content:space-between;height:100%;padding:0 10px 0 18px;font-size:13px">ON<div style="width:44px;height:44px;border-radius:50%;background:#4ad97a"></div></div>'},
+  {n:'차트 카드',w:290,h:170,r:22,c:'<div style="padding:16px;text-align:left"><div style="font-size:12px;opacity:.6">이번 주 걸음</div><div style="font:800 26px Inter">48,210</div><div style="display:flex;gap:8px;align-items:flex-end;height:64px;margin-top:8px"><i style="flex:1;height:40%;background:#444;border-radius:4px"></i><i style="flex:1;height:65%;background:#444;border-radius:4px"></i><i style="flex:1;height:50%;background:#444;border-radius:4px"></i><i style="flex:1;height:90%;background:#e0573a;border-radius:4px"></i><i style="flex:1;height:70%;background:#444;border-radius:4px"></i></div></div>'}];
+  const pill=h('div',null,null,st);pill.style.cssText='background:#111;color:#fff;overflow:hidden;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.18)';
+  const inner=h('div',null,null,pill);inner.style.cssText='height:100%;white-space:nowrap';const lab=h('div','tip','',st);
+  let i=0,acc=0;const set=(k,first)=>{const s=S[k],b=P.bounce,tf=`cubic-bezier(.34,${1+b*.9},.5,1)`;pill.style.transition=first?'none':`width ${P.dur}ms ${tf},height ${P.dur}ms ${tf},border-radius ${P.dur}ms`;
+    pill.style.width=s.w+'px';pill.style.height=s.h+'px';pill.style.borderRadius=s.r+'px';inner.style.transition='none';inner.style.opacity=0;inner.innerHTML=s.c;
+    requestAnimationFrame(()=>{inner.style.transition=`opacity ${P.dur*.6}ms ${P.delay}ms`;inner.style.opacity=1});lab.innerHTML=`상태: <b>${s.n}</b> · 누를 때마다 바뀝니다`};
+  set(0,1);const next=()=>{i=(i+1)%S.length;set(i);acc=0};api.on(pill,'click',next);
+  api.frame((t,dt)=>{if(!P.auto)return;acc+=dt;if(acc>P.auto)next()})}});
+
+def({n:61,cat:'L',title:'도형 모핑',hint:'누르기',
+params:[['dur','바뀌는 시간',0.2,2.5,0.05,0.75,'초'],['over','넘침',0,1.5,0.05,0.5,''],['turn','바뀔 때 회전',0,360,5,90,'°'],['pts','윤곽 점 개수',8,120,4,60,'개',{r:1}]],
+spec:P=>`누를 때마다 도형이 원 → 사각형 → 삼각형 → 별 → 육각형 순으로 {${P.dur}초} 동안 윤곽이 이어지며 변하고, 그 사이 {${P.turn}°} 돈다. 끝에서 {${P.over}}만큼 살짝 넘쳤다 돌아오며 색도 함께 바뀐다. 윤곽은 점 {${P.pts}개}로 이루어져 있다.`,
+mount(st,P,api){st.style.cursor='pointer';const N=P.pts;
+  const poly=(k,off)=>a=>{const s=TAU/k,x=((a-off)%s+s)%s-s/2;return Math.cos(Math.PI/k)/Math.cos(x)};
+  const star=a=>{const s=TAU/5,x=((a+Math.PI/2)%s+s)%s;const t=Math.abs(x/s-.5)*2;return lerp(.45,1,t)};
+  const F=[()=>1,poly(4,Math.PI/4),poly(3,-Math.PI/2),star,poly(6,0)],COL=[['#5b6cf0','#2f3fd0'],['#e0573a','#b93a20'],['#2bb38a','#13866a'],['#f5b73b','#e08a14'],['#a35be6','#7134c0']];
+  const shp=k=>Array.from({length:N},(_,i)=>{const a=i/N*TAU-Math.PI/2;return F[k](a)});
+  st.insertAdjacentHTML('beforeend',`<svg viewBox="-150 -150 300 300" style="position:absolute;inset:0;width:100%;height:100%"><defs><linearGradient id="g61" x1="0" y1="0" x2="1" y2="1"><stop offset="0"/><stop offset="1"/></linearGradient></defs><ellipse cx="0" cy="118" rx="70" ry="8" fill="rgba(0,0,0,.08)"/><polygon fill="url(#g61)"/></svg>`);h('div','tip','눌러 보세요',st);
+  const pg=st.querySelector('polygon'),stops=st.querySelectorAll('stop');let k=0,A=shp(0),B=A,t0=-9,rot=0,r0=0;
+  const hex=c=>c.match(/\w\w/g).map(x=>parseInt(x,16)),mixc=(a,b,t)=>{const x=hex(a),y=hex(b);return`rgb(${x.map((v,i)=>Math.round(lerp(v,y[i],t))).join()})`};
+  let ca=COL[0],cb=COL[0];
+  api.on(st,'click',()=>{A=B.map((v,i)=>cur[i]);ca=[stops[0].getAttribute('stop-color')?COL[k][0]:COL[k][0],COL[k][1]];k=(k+1)%F.length;B=shp(k);cb=COL[k];t0=performance.now()/1000;r0=rot});
+  let cur=A.slice();const eo=backOut(1);
+  api.frame(s=>{const t=clamp((s-t0)/P.dur,0,1),e=P.over?lerp(easeIO(t),backOut(P.over)(t),1):easeIO(t);
+    cur=A.map((v,i)=>lerp(v,B[i],e));rot=r0+P.turn*easeIO(t);const R=95;
+    pg.setAttribute('points',cur.map((r,i)=>{const a=i/N*TAU-Math.PI/2+rot*Math.PI/180;return (Math.cos(a)*r*R).toFixed(1)+','+(Math.sin(a)*r*R).toFixed(1)}).join(' '));
+    stops[0].setAttribute('stop-color',mixc(ca[0],cb[0],clamp(t,0,1)));stops[1].setAttribute('stop-color',mixc(ca[1],cb[1],clamp(t,0,1)))})}});
+
+def({n:62,cat:'L',title:'말랑한 덩어리',hint:'커서 움직이기',dark:true,
+params:[['stiff','스프링 강도',0.01,0.3,0.01,0.07,''],['damp','감쇠',0.5,0.98,0.01,0.84,''],['goo','끈적임',4,30,1,14,'px'],['size','큰 덩어리 크기',30,110,2,64,'px']],
+spec:P=>`작은 주황 방울이 스프링(강도 {${P.stiff}}, 감쇠 {${P.damp}})처럼 커서를 따라가고, 반지름 {${P.size}px}의 큰 덩어리에 가까워지면 {${P.goo}px} 끈적임으로 서로 늘어 붙었다 떨어진다. 빠르게 움직일수록 방울이 진행 방향으로 늘어난다.`,
+mount(st,P,api){const id='goo'+Math.random().toString(36).slice(2,6);
+  st.insertAdjacentHTML('beforeend',`<svg width="0" height="0" style="position:absolute"><filter id="${id}"><feGaussianBlur in="SourceGraphic" stdDeviation="${P.goo}" result="b"/><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 ${P.goo*1.6} ${-P.goo*0.75}"/></filter></svg>`);
+  const layer=h('div',null,null,st);layer.style.cssText=`position:absolute;inset:0;filter:url(#${id})`;const fb=st.querySelector('feGaussianBlur'),fm=st.querySelector('feColorMatrix');
+  const big=h('div',null,null,layer),sm=h('div',null,null,layer);[big,sm].forEach(e=>e.style.cssText='position:absolute;left:0;top:0;border-radius:50%;background:#ef6a45');
+  h('div','tip','커서를 움직여 보세요',st);
+  let tx=0,ty=0,x=0,y=0,vx=0,vy=0,bx=0,by=0,init=0,sp=0;api.on(st,'pointermove',e=>{const p=api.pt(e);tx=p.x;ty=p.y});
+  api.frame(s=>{const W=st.clientWidth,H=st.clientHeight;if(!init){init=1;tx=x=W*.3;ty=y=H*.5}
+    bx=W*.58+Math.sin(s*.8)*14;by=H*.48+Math.cos(s*.6)*10;vx=(vx+(tx-x)*P.stiff)*P.damp;vy=(vy+(ty-y)*P.stiff)*P.damp;x+=vx;y+=vy;
+    sp=lerp(sp,Math.hypot(vx,vy),.2);const ang=Math.atan2(vy,vx),st2=1+Math.min(.8,sp/40),r=22;
+    fb.setAttribute('stdDeviation',P.goo);fm.setAttribute('values',`1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 ${P.goo*1.6} ${-P.goo*0.75}`);
+    const R=P.size*(1+Math.sin(s*2)*.03);big.style.width=big.style.height=R*2+'px';big.style.transform=`translate(${bx-R}px,${by-R}px)`;
+    sm.style.width=sm.style.height=r*2+'px';sm.style.transform=`translate(${x-r}px,${y-r}px) rotate(${ang}rad) scale(${st2},${1/st2})`})}});
+
+def({n:63,cat:'L',title:'점이 모여 모양',hint:'스크롤해 보기',dark:true,bg:'#0c0f1a',
+params:[['count','점 개수',300,3000,100,1400,'개',{r:1}],['size','점 크기',0.5,4,0.1,1.6,'px'],['jitter','모인 뒤 떨림',0,8,0.5,1.5,'px'],['stag','점마다 시차',0,0.8,0.05,0.4,'']],
+spec:P=>`밤하늘에 흩어진 {${P.count}개}의 점(크기 {${P.size}px})이 스크롤을 내리면 점마다 최대 {${P.stag}}의 시차를 두고 날아가 "MOTION" 글자 모양으로 모인다. 모인 뒤에도 {${P.jitter}px}씩 살짝 떨린다. 다시 올리면 흩어진다.`,
+mount(st,P,api){const s=api.scroll(4,'스크롤하면 점이 모입니다 ↓');const c=api.canvas(s.view);c.cv.style.zIndex=0;let pts=[];
+  const make=()=>{const W=c.W,H=c.H,o=document.createElement('canvas');o.width=W;o.height=H;const g=o.getContext('2d');g.fillStyle='#fff';g.font=`900 ${Math.min(W/4.2,120)}px Inter`;g.textAlign='center';g.textBaseline='middle';g.fillText('MOTION',W/2,H/2);
+    const d=g.getImageData(0,0,W,H).data,T=[];for(let y=0;y<H;y+=2)for(let x=0;x<W;x+=2)if(d[(y*W+x)*4+3]>128)T.push([x,y]);
+    pts=Array.from({length:P.count},()=>{const t=T[Math.floor(Math.random()*T.length)]||[W/2,H/2];return{x0:rnd(0,W),y0:rnd(0,H),tx:t[0],ty:t[1],d:Math.random(),ph:rnd(0,TAU),hue:rnd(190,230)}})};
+  c.onfit=make;make();
+  api.frame(t=>{const g=c.ctx,p=s.p();g.clearRect(0,0,c.W,c.H);
+    for(const o of pts){const k=easeIO(clamp((p*1.3-o.d*P.stag)/(1-P.stag+1e-3),0,1));const j=P.jitter*k;
+      const x=lerp(o.x0+Math.sin(t*.3+o.ph)*6,o.tx,k)+Math.sin(t*3+o.ph)*j,y=lerp(o.y0+Math.cos(t*.3+o.ph)*6,o.ty,k)+Math.cos(t*2.6+o.ph)*j;
+      g.fillStyle=`hsla(${o.hue},80%,${70+k*20}%,${.5+k*.5})`;g.fillRect(x,y,P.size,P.size)}})}});
+
+def({n:64,cat:'L',title:'점 격자 물결',hint:'한 곳 누르기',dark:true,bg:'#111216',
+params:[['gap','점 간격',10,40,1,20,'px'],['speed','퍼지는 속도',100,1200,20,420,'px/초'],['amp','물결 세기',0,30,1,10,'px'],['wl','파장',20,200,5,70,'px'],['decay','사라지는 속도',0.3,5,0.1,1.4,'']],
+spec:P=>`간격 {${P.gap}px}의 점 격자에서 누른 자리부터 원형 물결이 초당 {${P.speed}px}로 퍼진다. 물결이 지나가는 점은 최대 {${P.amp}px} 밀려나며 커졌다 돌아오고, 파장은 {${P.wl}px}, 세기는 {${P.decay}}의 속도로 줄어든다.`,
+mount(st,P,api){const c=api.canvas();const W=[];h('div','tip','한 곳을 눌러 보세요',st);st.style.cursor='pointer';
+  api.on(st,'pointerdown',e=>{const p=api.pt(e);W.push({x:p.x,y:p.y,t:performance.now()/1000});if(W.length>8)W.shift()});
+  api.frame(t=>{const g=c.ctx,G=P.gap;g.clearRect(0,0,c.W,c.H);
+    for(let y=G/2;y<c.H;y+=G)for(let x=G/2;x<c.W;x+=G){let dx=0,dy=0,s=0;
+      for(const w of W){const age=t-w.t,d=Math.hypot(x-w.x,y-w.y)||1,f=d-age*P.speed;if(f>0||f<-P.wl*3)continue;const a=Math.sin(f/P.wl*TAU)*Math.exp(-age*P.decay)*Math.exp(f/(P.wl*2));dx+=(x-w.x)/d*a*P.amp;dy+=(y-w.y)/d*a*P.amp;s+=Math.abs(a)}
+      const r=1.3+s*2.2;g.fillStyle=s>.05?`rgba(${200+s*55},${200-s*60},${190-s*120},${.5+s})`:'rgba(220,220,230,.45)';g.beginPath();g.arc(x+dx,y+dy,Math.min(r,6),0,TAU);g.fill()}})}});
+
+def({n:65,cat:'L',title:'솟아오르는 블록 바닥',hint:'커서 움직이기',bg:'linear-gradient(#f4f5f8,#e4e7ee)',
+params:[['maxh','최대 높이',0,120,2,48,'px'],['rad','영향 반경',1,8,0.5,2.5,'칸'],['speed','반응 속도',0.02,0.5,0.01,0.12,''],['n','칸 수',6,20,1,12,'칸',{r:1}]],
+spec:P=>`{${P.n}×${P.n}칸}의 아이소메트릭 블록 바닥에서 커서 아래 칸을 중심으로 반경 {${P.rad}칸} 안의 블록이 최대 {${P.maxh}px}까지 솟는다. 가까울수록 높고, 높이는 매 프레임 {${P.speed}} 비율로 따라 오르내린다.`,
+mount(st,P,api){const c=api.canvas(),N=P.n,Hh=new Float32Array(N*N);let mx=-99,my=-99;h('div','tip','커서를 올려 움직여 보세요',st);
+  const geo=()=>{const tw=Math.min(c.W*.8/N,c.H*1.25/N),th=tw/2;return{tw,th,ox:c.W/2,oy:c.H/2-N*th/2+10}};
+  api.on(st,'pointermove',e=>{const p=api.pt(e),{tw,th,ox,oy}=geo(),a=(p.x-ox)/(tw/2),b=(p.y-oy)/(th/2);mx=(a+b)/2;my=(b-a)/2});api.on(st,'pointerleave',()=>{mx=my=-99});
+  api.frame(()=>{const g=c.ctx,{tw,th,ox,oy}=geo();g.clearRect(0,0,c.W,c.H);
+    for(let s=0;s<2*N-1;s++)for(let i=0;i<N;i++){const j=s-i;if(j<0||j>=N)continue;const k=i*N+j,d=Math.hypot(i+.5-mx,j+.5-my),tgt=P.maxh*Math.max(0,1-d/P.rad)**1.5;Hh[k]=lerp(Hh[k],tgt,P.speed);
+      const H=Hh[k],x=ox+(i-j)*tw/2,y=oy+(i+j)*th/2-H,lt=Math.round(232+H/P.maxh*14||232);
+      g.beginPath();g.moveTo(x,y);g.lineTo(x+tw/2,y+th/2);g.lineTo(x,y+th);g.lineTo(x-tw/2,y+th/2);g.closePath();g.fillStyle=H>1?`hsl(${230-H},${20+H/2}%,${78+H/8}%)`:'#eceef3';g.fill();g.strokeStyle='rgba(120,128,150,.25)';g.stroke();
+      if(H>.5||i==N-1||j==N-1){const hh=Math.max(H,i==N-1||j==N-1?8:0);
+        g.beginPath();g.moveTo(x-tw/2,y+th/2);g.lineTo(x,y+th);g.lineTo(x,y+th+hh);g.lineTo(x-tw/2,y+th/2+hh);g.closePath();g.fillStyle=H>1?`hsl(${230-H},20%,62%)`:'#b9bdc8';g.fill();
+        g.beginPath();g.moveTo(x+tw/2,y+th/2);g.lineTo(x,y+th);g.lineTo(x,y+th+hh);g.lineTo(x+tw/2,y+th/2+hh);g.closePath();g.fillStyle=H>1?`hsl(${230-H},18%,50%)`:'#9fa4b1';g.fill()}}})}});
+/* ───────── M 그려지고 자란다 ───────── */
+def({n:66,cat:'M',title:'윤곽선 그리기',hint:'스크롤해 보기',
+params:[['w','선 굵기',1,8,0.5,3,'px'],['dash','점선 간격',0,20,1,6,'px'],['lag','따라오는 부드러움',0,0.95,0.05,0.8,''],['dot','등산객 점 크기',0,14,1,7,'px']],
+spec:P=>`스크롤하면 산 윤곽선과 정상까지의 등산로가 아래에서부터 그려진다. 등산로는 굵기 {${P.w}px}, 간격 {${P.dash}px}의 점선이고, 선 끝에는 {${P.dot}px} 점이 길을 따라 오른다. 스크롤 값은 부드러움 {${P.lag}}로 늦게 따라온다.`,
+mount(st,P,api){const s=api.scroll(4,null);const v=s.view;
+  v.innerHTML=`<svg viewBox="0 0 600 340" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%"><rect width="600" height="340" fill="#e3e8ef"/><circle cx="470" cy="80" r="30" fill="#f6dcae"/>
+  <path d="M0 230 L120 150 L200 200 L280 130 L380 210 L470 150 L600 220 V340 H0Z" fill="#c4cfdc"/>
+  <path class="mt" d="M70 340 L300 60 L540 340" fill="#5e7a63" stroke="#2d3b30" stroke-width="2"/><path d="M300 60 L272 94 L288 90 L300 102 L314 88 L328 94Z" fill="#fff"/>
+  <path d="M300 60 L540 340 L410 340Z" fill="rgba(0,0,0,.1)"/>
+  <mask id="mk66"><path class="trM" fill="none" stroke="#fff" stroke-width="16" stroke-linecap="round"/></mask>
+  <path class="tr" fill="none" stroke="#fff" stroke-linecap="round" mask="url(#mk66)"/><circle class="hk" r="6" fill="#e0573a" stroke="#fff" stroke-width="2"/></svg>`;
+  const tip=h('div','tip','스크롤해 보세요',v);tip.style.color='#fff';
+  const d='M300 330 C 230 310, 250 290, 330 280 S 390 250, 300 235 S 220 205, 300 190 S 360 160, 300 140 S 270 110, 300 64';
+  const tr=v.querySelector('.tr'),tm=v.querySelector('.trM'),hk=v.querySelector('.hk'),mt=v.querySelector('.mt');tr.setAttribute('d',d);tm.setAttribute('d',d);
+  const L=tr.getTotalLength(),ML=mt.getTotalLength();tm.style.strokeDasharray=L;mt.style.strokeDasharray=ML;let q=0;
+  api.frame(()=>{q=lerp(s.p(),q,P.lag);tr.setAttribute('stroke-width',P.w);tr.setAttribute('stroke-dasharray',P.dash?`${P.dash*.4} ${P.dash}`:'none');
+    tm.style.strokeDashoffset=L*(1-q);mt.style.strokeDashoffset=ML*(1-clamp(q*1.6,0,1));const pt=tr.getPointAtLength(L*q);hk.setAttribute('cx',pt.x);hk.setAttribute('cy',pt.y);hk.setAttribute('r',P.dot);hk.style.opacity=P.dot?1:0})}});
+
+def({n:67,cat:'M',title:'펜으로 그려 나가기',hint:'스크롤해 보기',bg:'#f6f7f9',
+params:[['w','펜 굵기',1,6,0.25,2.5,'px'],['over','획끼리 겹침',0,1,0.05,0.25,''],['hue','잉크 색',0,360,5,225,'°'],['nib','펜촉 크기',0,10,1,5,'px']],
+spec:P=>`스크롤에 맞춰 보이지 않는 펜이 화분·식물·창문 그림을 획 하나씩 순서대로 그린다. 앞 획이 끝나기 전에 다음 획이 {${P.over}}만큼 겹쳐 시작하고, 선은 굵기 {${P.w}px}, 색상 {${P.hue}°}의 잉크, 펜촉은 {${P.nib}px} 점이다.`,
+mount(st,P,api){const s=api.scroll(5,'아래로 스크롤하면 그림이 시작됩니다 ↓');const v=s.view;
+  const D=['M190 300 L410 300','M230 300 L245 220 L355 220 L370 300','M225 220 L375 220','M300 220 C 300 170, 300 140, 300 110','M300 170 C 260 160, 235 130, 240 100 C 275 110, 295 135, 300 170','M300 150 C 335 140, 360 110, 362 82 C 330 90, 305 115, 300 150','M300 110 C 285 85, 288 60, 300 42 C 312 60, 315 85, 300 110','M440 70 H540 V170 H440Z','M490 70 V170 M440 120 H540','M70 300 C 90 260, 120 250, 140 300'];
+  v.insertAdjacentHTML('afterbegin',`<svg viewBox="0 0 600 340" style="position:absolute;inset:0;width:100%;height:100%">${D.map(d=>`<path d="${d}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`).join('')}<circle class="nib" r="4"/></svg>`);
+  const ps=[...v.querySelectorAll('path')],nib=v.querySelector('.nib'),L=ps.map(p=>p.getTotalLength());ps.forEach((p,i)=>p.style.strokeDasharray=L[i]);
+  api.frame(()=>{const p=s.p(),n=ps.length,seg=1/(n-(n-1)*P.over);let tip=null;const col=`hsl(${P.hue},45%,30%)`;
+    ps.forEach((e,i)=>{const st0=i*seg*(1-P.over),k=clamp((p-st0)/seg,0,1);e.style.strokeDashoffset=L[i]*(1-k);e.setAttribute('stroke',col);e.setAttribute('stroke-width',P.w);if(k>0&&k<1)tip=e.getPointAtLength(L[i]*k)});
+    nib.style.opacity=tip&&P.nib?1:0;if(tip){nib.setAttribute('cx',tip.x);nib.setAttribute('cy',tip.y)}nib.setAttribute('r',P.nib);nib.setAttribute('fill',`hsl(${P.hue},70%,50%)`)})}});
+
+def({n:68,cat:'M',title:'지도에 경로 긋기',hint:'스크롤해 보기',bg:'#f1f2f4',
+params:[['w','경로 굵기',2,10,0.5,5,'px'],['km','총 거리',1,50,0.5,12,'km'],['zoom','따라가는 확대',1,2.5,0.05,1.6,'배'],['smooth','카메라 부드러움',0.02,1,0.02,0.1,'']],
+spec:P=>`스크롤하면 지도 위에 출발점에서 도착점까지 굵기 {${P.w}px}의 경로가 그어지고, 카메라가 {${P.zoom}배} 확대된 채 선 끝을 부드러움 {${P.smooth}}로 따라간다. 화면 위 숫자는 0에서 {${P.km}km}까지 함께 올라간다.`,
+mount(st,P,api){const s=api.scroll(5,'스크롤해 보세요 ⌄');const v=s.view;
+  let blocks='';for(let y=0;y<7;y++)for(let x=0;x<10;x++){if((x*7+y*3)%5==0)continue;blocks+=`<rect x="${x*64+8}" y="${y*52+8}" width="${52}" height="${40}" rx="4" fill="${(x+y)%4==0?'#d9ead7':'#e6e7ea'}"/>`}
+  v.insertAdjacentHTML('afterbegin',`<svg viewBox="0 0 640 360" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%"><g class="cam"><rect width="640" height="360" fill="#f7f7f8"/>${blocks}<path d="M-20 250 C 120 230, 200 300, 330 260 S 520 180, 660 210" fill="none" stroke="#bcd6ef" stroke-width="22"/>
+  <path class="rt" d="M40 330 L40 270 Q40 254 56 254 L184 254 Q200 254 200 238 L200 150 Q200 134 216 134 L392 134 Q408 134 408 118 L408 60 Q408 44 424 44 L600 44" fill="none" stroke="#e0573a" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="40" cy="330" r="8" fill="#17171a"/><g class="end" transform="translate(600 44)"><path d="M0 0 C -12 -14,-12 -28,0 -28 C 12 -28,12 -14,0 0Z" fill="#e0573a"/><circle cy="-19" r="4" fill="#fff"/></g><circle class="hd" r="7" fill="#fff" stroke="#e0573a" stroke-width="4"/></g></svg>
+  <div class="km" style="position:absolute;left:14px;top:12px;background:#17171a;color:#fff;border-radius:10px;padding:6px 10px;font:700 15px Inter">0.0 km</div>`);
+  const rt=v.querySelector('.rt'),hd=v.querySelector('.hd'),cam=v.querySelector('.cam'),km=v.querySelector('.km'),end=v.querySelector('.end'),L=rt.getTotalLength();rt.style.strokeDasharray=L;let cx=320,cy=180,z=1;
+  api.frame(()=>{const p=s.p(),pt=rt.getPointAtLength(L*p);rt.setAttribute('stroke-width',P.w);rt.style.strokeDashoffset=L*(1-p);hd.setAttribute('cx',pt.x);hd.setAttribute('cy',pt.y);
+    const fin=p>.98;const tz=fin?1:P.zoom,tx=fin?320:pt.x,ty=fin?180:pt.y;cx=lerp(cx,tx,P.smooth);cy=lerp(cy,ty,P.smooth);z=lerp(z,tz,P.smooth);
+    cam.setAttribute('transform',`translate(320 180) scale(${z}) translate(${-clamp(cx,320/z,640-320/z)} ${-clamp(cy,180/z,360-180/z)})`);km.textContent=(P.km*p).toFixed(1)+' km';end.style.opacity=.4+p*.6})}});
+
+def({n:69,cat:'M',title:'차트가 자란다',hint:'스크롤해 보기',bg:'#f6f7f9',
+params:[['bars','막대 개수',3,12,1,7,'개',{r:1}],['stag','막대 사이 시차',0,0.9,0.05,0.45,''],['round','막대 둥글기',0,20,1,6,'px'],['over','자랄 때 넘침',0,1,0.05,0.3,'']],
+spec:P=>`스크롤하면 {${P.bars}개}의 막대가 왼쪽부터 시차 {${P.stag}}를 두고 바닥에서 자라고, 막대 위 숫자도 0부터 제 값까지 함께 센다. 막대 끝은 {${P.round}px} 둥글고, 다 자랄 때 {${P.over}}만큼 넘쳤다 자리 잡는다.`,
+mount(st,P,api){const s=api.scroll(4,'아래로 스크롤하세요');const v=s.view;const n=P.bars;
+  const vals=Array.from({length:n},(_,i)=>Math.round(30+60*Math.abs(Math.sin(i*1.7+1))+i*3));const mx=Math.max(...vals);
+  const box=h('div',null,`<div style="font-weight:700;font-size:15px">월별 방문자 <span style="font:500 12px Inter;opacity:.5">단위 천 명 · 예시 데이터</span></div>`,v);box.style.cssText='position:absolute;inset:22px 24px 46px';
+  const row=h('div',null,null,box);row.style.cssText='position:absolute;left:0;right:0;bottom:22px;top:40px;display:flex;gap:10px;align-items:flex-end;border-bottom:1px solid #cfd3da';
+  const B=vals.map((x,i)=>{const col=h('div',null,`<div class="nm" style="font:700 12px Inter;text-align:center;margin-bottom:4px">0</div><div class="br" style="height:0;background:${i==vals.indexOf(mx)?'#e0573a':'#4a63e7'}"></div><div style="position:absolute;bottom:-20px;left:0;right:0;text-align:center;font-size:11px;opacity:.55">${i+1}월</div>`,row);col.style.cssText='flex:1;position:relative;display:flex;flex-direction:column;justify-content:flex-end;height:100%';return{nm:col.querySelector('.nm'),br:col.querySelector('.br'),v:x}});
+  const bo=backOut(1);api.frame(()=>{const p=s.p();B.forEach((b,i)=>{const t=clamp((p*1.2-i/n*P.stag)/(1-P.stag+1e-3),0,1),e=lerp(easeIO(t),backOut(P.over*1.5)(t),P.over?1:0);
+    b.br.style.height=(b.v/mx*100*Math.max(0,e)*.9)+'%';b.br.style.borderRadius=`${P.round}px ${P.round}px 0 0`;b.nm.textContent=Math.round(b.v*clamp(t,0,1))})})}});
+
+def({n:70,cat:'M',title:'연도가 넘어가는 타임라인',hint:'스크롤해 보기',
+params:[['y0','시작 연도',1950,2000,1,1996,'',{r:1}],['y1','끝 연도',2001,2030,1,2024,'',{r:1}],['snap','마디에 멈추는 힘',0,1,0.05,0.6,''],['size','연도 글자 크기',50,150,2,104,'px']],
+spec:P=>`스크롤하면 큰 연도 숫자가 {${P.y0}}에서 {${P.y1}}까지 한 해씩 넘어가고, 아래 타임라인의 점이 차례로 채워진다. 사건이 있는 마디 근처에서는 {${P.snap}}의 힘으로 잠시 멈춘 듯 느려진다. 연도 크기 {${P.size}px}.`,
+mount(st,P,api){const s=api.scroll(6,'스크롤해 보세요');const v=s.view;const a=P.y0,b=Math.max(P.y1,a+4);
+  const M=[0,.25,.5,.75,1].map(t=>Math.round(lerp(a,b,t)));const ev=['시작','첫 출시','확장','전환','오늘'];
+  v.innerHTML+=`<div class="yr" style="position:absolute;left:0;right:0;top:46px;text-align:center;font-family:Inter;font-weight:900;letter-spacing:-.04em;line-height:1">${a}</div><div class="ev" style="position:absolute;left:0;right:0;top:170px;text-align:center;font-size:14px;opacity:.6"></div>
+  <div style="position:absolute;left:12%;right:12%;top:230px;height:2px;background:#d6d2c8"><div class="fill" style="height:100%;background:#e0573a;width:0"></div>${M.map((y,i)=>`<div class="mk" style="position:absolute;left:${i*25}%;top:-7px;width:16px;height:16px;margin-left:-8px;border-radius:50%;border:2px solid #c9c4b8;background:#f1efe9"></div><div style="position:absolute;left:${i*25}%;top:16px;transform:translateX(-50%);font:600 12px Inter;opacity:.55">${y}</div>`).join('')}</div>`;
+  const yr=v.querySelector('.yr'),fill=v.querySelector('.fill'),mk=[...v.querySelectorAll('.mk')],evE=v.querySelector('.ev');
+  api.frame(()=>{let p=s.p();const seg=p*4,k=Math.round(seg),f=seg-k;const sn=k/4+(f/4)*(1-P.snap*Math.exp(-Math.abs(f)*6));p=clamp(lerp(p,sn,P.snap),0,1);
+    const y=Math.round(lerp(a,b,p));yr.textContent=y;yr.style.fontSize=P.size+'px';fill.style.width=p*100+'%';
+    mk.forEach((m,i)=>{const on=p>=i/4-.001;m.style.background=on?'#e0573a':'#f1efe9';m.style.borderColor=on?'#e0573a':'#c9c4b8'});const near=M.findIndex(x=>Math.abs(x-y)<=(b-a)*.03);evE.textContent=near>=0?ev[near]:''})}});
+/* ───────── N 무게가 있다 ───────── */
+def({n:71,cat:'N',title:'찌그러지며 튕기는 공',hint:'화면 누르기',
+params:[['g','중력',300,4000,50,1800,'px/초²'],['rest','탄성',0.2,0.95,0.01,0.7,''],['sq','찌그러짐',0,0.8,0.02,0.4,''],['size','공 지름',20,90,2,46,'px']],
+spec:P=>`화면을 누르면 지름 {${P.size}px} 공이 그 위치 위쪽에서 떨어진다. 중력 {${P.g}px/초²}로 가속하고 바닥에 닿으면 속도의 {${Math.round(P.rest*100)}%}로 튀어 오른다. 닿는 순간 세기에 비례해 최대 {${P.sq}}만큼 납작해졌다가 위로 길쭉하게 늘어나며 회복한다.`,
+mount(st,P,api){st.style.cursor='pointer';const fl=h('div',null,null,st);fl.style.cssText='position:absolute;left:0;right:0;bottom:0;height:56px;background:#d9d2c4;border-top:1px solid #bfb6a4';
+  h('div',null,'화면을 누르면 공이 떨어집니다',st).style.cssText='position:absolute;top:14px;left:0;right:0;text-align:center;font-size:13px;opacity:.6';
+  const ball=h('div',null,null,st),sh=h('div',null,null,st);ball.style.cssText='position:absolute;left:0;top:0;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f08a6c,#d9502f 60%,#b33c20);transform-origin:50% 100%';
+  sh.style.cssText='position:absolute;left:0;height:8px;border-radius:50%;background:rgba(0,0,0,.18)';
+  let x=0,y=-1,vy=0,sq=0,sqv=0,init=0;api.on(st,'pointerdown',e=>{const p=api.pt(e);x=p.x;y=Math.min(p.y,60);vy=0});
+  api.frame((t,dt)=>{const W=st.clientWidth,H=st.clientHeight,D=P.size,fy=H-56;if(!init){init=1;x=W/2;y=60}
+    vy+=P.g*dt;y+=vy*dt;if(y+D>=fy&&vy>0){y=fy-D;const imp=Math.min(1,vy/1400);sqv-=imp*P.sq*30;vy=-vy*P.rest;if(Math.abs(vy)<40)vy=0}
+    sqv+=(-sq*320-sqv*14)*dt;sq+=sqv*dt;const k=clamp(1+sq,.2,1.8);
+    ball.style.width=ball.style.height=D+'px';ball.style.transform=`translate(${x-D/2}px,${y}px) scale(${1/Math.sqrt(k)},${k})`;
+    const hgt=clamp((fy-y-D)/H,0,1);sh.style.width=D*(1-hgt*.6)+'px';sh.style.transform=`translate(${x-D*(1-hgt*.6)/2}px,${fy-4}px)`;sh.style.opacity=1-hgt})}});
+
+def({n:72,cat:'N',title:'쏟아져 쌓이는 알갱이',hint:'꾹 누르고 있기',
+params:[['rate','초당 알갱이',50,1500,10,420,'개'],['cell','알갱이 크기',2,6,1,3,'px',{r:1}],['spread','쏟는 폭',1,20,1,5,'칸'],['slide','옆으로 미끄러짐',0,1,0.05,0.9,'']],
+spec:P=>`누르고 있는 동안 누른 자리에서 초당 {${P.rate}개}의 {${P.cell}px} 모래 알갱이가 폭 {${P.spread}칸}으로 쏟아진다. 알갱이는 아래가 비면 떨어지고, 막히면 {${Math.round(P.slide*100)}%} 확률로 비스듬히 미끄러져 기울어진 판 위에 산처럼 쌓인다. 판 끝에서 넘치면 아래로 흘러 떨어진다.`,
+mount(st,P,api){const c=api.canvas(),C=P.cell;let gw,gh,G,col;st.style.cursor='crosshair';
+  const rb=h('button','btn','↺',st);rb.style.cssText='position:absolute;right:10px;top:10px;z-index:6;width:34px;padding:0';h('div',null,'꾹 누르고 있어 보세요',st).style.cssText='position:absolute;top:14px;left:0;right:0;text-align:center;font-size:13px;opacity:.6;pointer-events:none';
+  const init=()=>{gw=Math.ceil(c.W/C);gh=Math.ceil(c.H/C);G=new Uint8Array(gw*gh);col=new Uint8Array(gw*gh);
+    const y0=Math.floor(gh*.62),x0=Math.floor(gw*.15),x1=Math.floor(gw*.85);for(let x=x0;x<=x1;x++){const y=Math.round(y0+(x-x0)*.12);for(let k=0;k<2;k++)G[(y+k)*gw+x]=2}
+    for(const px of [x0+Math.floor((x1-x0)*.2),x0+Math.floor((x1-x0)*.8)]){const yt=Math.round(y0+(px-x0)*.12)+2;for(let y=yt;y<gh;y++)G[y*gw+px]=2}};
+  init();c.onfit=init;api.on(rb,'click',e=>{e.stopPropagation();init()});
+  let down=false,mx=0,my=0,acc=0;api.on(st,'pointerdown',e=>{if(e.target===rb)return;down=true;const p=api.pt(e);mx=p.x;my=p.y;st.setPointerCapture(e.pointerId)});api.on(st,'pointermove',e=>{const p=api.pt(e);mx=p.x;my=p.y});
+  api.on(st,'pointerup',()=>down=false);api.on(st,'pointercancel',()=>down=false);
+  const PAL=[[214,178,120],[196,156,98],[226,196,140],[180,140,90]];
+  api.frame((t,dt)=>{if(down){acc+=P.rate*dt;while(acc>=1){acc--;const x=Math.floor(mx/C+rnd(-P.spread,P.spread)),y=Math.floor(my/C+rnd(-1,1));if(x>=0&&x<gw&&y>=0&&y<gh&&!G[y*gw+x]){G[y*gw+x]=1;col[y*gw+x]=Math.floor(Math.random()*4)}}}
+    for(let y=gh-1;y>=0;y--){const dir=Math.random()<.5;for(let i=0;i<gw;i++){const x=dir?i:gw-1-i,k=y*gw+x;if(G[k]!==1)continue;if(y==gh-1){G[k]=0;continue}
+      const b=k+gw;if(!G[b]){G[b]=1;col[b]=col[k];G[k]=0;continue}if(Math.random()>P.slide)continue;const s=Math.random()<.5?-1:1;
+      for(const d of [s,-s]){const nx=x+d;if(nx<0||nx>=gw){G[k]=0;break}if(!G[b+d]){G[b+d]=1;col[b+d]=col[k];G[k]=0;break}}}}
+    const g=c.ctx;g.clearRect(0,0,c.W,c.H);for(let k=0;k<G.length;k++){if(!G[k])continue;const x=k%gw,y=(k/gw)|0;if(G[k]==2){g.fillStyle='#6f5a44'}else{const q=PAL[col[k]];g.fillStyle=`rgb(${q})`}g.fillRect(x*C,y*C,C,C)}})}});
+
+def({n:73,cat:'N',title:'부딪혀 무너짐',hint:'화면 누르기',
+params:[['power','발사 속도',300,1600,20,900,'px/초'],['g','중력',500,3000,50,1600,'px/초²'],['rows','벽 높이',3,12,1,8,'줄',{r:1}],['spread','흩어짐',0,1,0.05,0.5,'']],
+spec:P=>`화면을 누르면 왼쪽 대포가 {${P.power}px/초}로 포탄을 쏜다. 포탄이 {${P.rows}줄} 벽돌 벽에 맞으면 맞은 벽돌이 튕겨 나가고, 받침을 잃은 위쪽 벽돌들이 중력 {${P.g}px/초²}로 떨어지며 흩어짐 {${P.spread}}만큼 굴러 무너진다.`,
+mount(st,P,api){const c=api.canvas();st.style.cursor='pointer';const rb=h('button','btn','↺',st);rb.style.cssText='position:absolute;right:10px;top:10px;z-index:6;width:34px;padding:0';
+  h('div',null,'눌러 보세요',st).style.cssText='position:absolute;top:14px;left:0;right:0;text-align:center;font-size:13px;opacity:.6;pointer-events:none';
+  let B=[],balls=[],fy;const bw=30,bh=14;
+  const init=()=>{fy=c.H-50;B=[];const cols=5,x0=c.W*.6;for(let r=0;r<P.rows;r++)for(let i=0;i<cols+(r%2?0:0);i++){const x=x0+i*bw+(r%2?bw/2:0);B.push({x,y:fy-(r+1)*bh,vx:0,vy:0,a:0,w:0,dyn:false,rest:false})}balls=[]};init();c.onfit=init;
+  api.on(rb,'click',e=>{e.stopPropagation();init()});
+  api.on(st,'pointerdown',e=>{if(e.target===rb)return;const a=-0.12;balls.push({x:70,y:fy-30,vx:P.power*Math.cos(a),vy:P.power*Math.sin(a)})});
+  const sup=b=>{if(b.y+bh>=fy-.5)return true;return B.some(o=>o!==b&&!o.dyn&&Math.abs(o.y-(b.y+bh))<2&&o.x<b.x+bw-4&&o.x+bw>b.x+4)};
+  api.frame((t,dt)=>{const g=c.ctx;
+    for(const ba of balls){ba.vy+=P.g*.35*dt;ba.x+=ba.vx*dt;ba.y+=ba.vy*dt;if(ba.y>fy-10){ba.y=fy-10;ba.vy*=-.3;ba.vx*=.8}
+      for(const b of B){if(ba.x+10>b.x&&ba.x-10<b.x+bw&&ba.y+10>b.y&&ba.y-10<b.y+bh){if(!b.dyn||Math.abs(b.vx)<50){b.dyn=true;b.vx=ba.vx*rnd(.4,.8);b.vy=ba.vy*.5-rnd(50,250)*P.spread;b.w=rnd(-8,8)*P.spread;ba.vx*=.82}}}}
+    balls=balls.filter(b=>b.x<c.W+40&&Math.abs(b.vx)>5);
+    for(const b of B){if(!b.dyn&&!sup(b)){b.dyn=true;b.vx=rnd(-60,120)*P.spread;b.w=rnd(-4,4)*P.spread}}
+    for(const b of B){if(!b.dyn||b.rest)continue;b.vy+=P.g*dt;b.x+=b.vx*dt;b.y+=b.vy*dt;b.a+=b.w*dt;
+      if(b.y+bh>=fy){b.y=fy-bh;b.vy*=-.25;b.vx*=.6;b.w*=.5;b.a=lerp(b.a,Math.round(b.a/(Math.PI/2))*(Math.PI/2),.3);if(Math.abs(b.vy)<30&&Math.abs(b.vx)<15){b.rest=true;b.vy=0}}}
+    g.clearRect(0,0,c.W,c.H);g.fillStyle='#e4dccd';g.fillRect(0,fy,c.W,c.H-fy);g.fillStyle='#cfc5b2';g.fillRect(0,fy,c.W,2);
+    g.fillStyle='#2b2d33';g.beginPath();g.arc(56,fy-12,14,0,TAU);g.fill();g.save();g.translate(56,fy-22);g.rotate(-0.12);g.fillRect(0,-7,34,14);g.restore();
+    for(const b of B){g.save();g.translate(b.x+bw/2,b.y+bh/2);g.rotate(b.a);g.fillStyle='#c4573b';g.fillRect(-bw/2+1,-bh/2+1,bw-2,bh-2);g.fillStyle='rgba(255,255,255,.15)';g.fillRect(-bw/2+1,-bh/2+1,bw-2,3);g.restore()}
+    g.fillStyle='#17171a';for(const ba of balls){g.beginPath();g.arc(ba.x,ba.y,9,0,TAU);g.fill()}})}});
+/* ───────── O 빛과 재질 ───────── */
+def({n:74,cat:'O',title:'빛 번짐',hint:'커서 올리기',dark:true,bg:'#111216',
+params:[['rad','빛 반경',50,500,10,220,'px'],['amt','안쪽 밝기',0,1,0.05,0.3,''],['edge','테두리 빛',0,1,0.05,0.8,''],['hue','빛 색상',0,360,5,30,'°']],
+spec:P=>`어두운 타일 위로 커서를 옮기면 커서를 중심으로 반경 {${P.rad}px}의 색상 {${P.hue}°} 빛이 번진다. 타일 안쪽은 {${P.amt}} 세기로 밝아지고, 빛이 닿은 타일 테두리는 {${P.edge}} 세기로 빛난다.`,
+mount(st,P,api){const grid=h('div',null,null,st);grid.style.cssText='position:absolute;inset:16px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px';
+  const T=['빛','Hover','번짐','Glow','인터랙션','Light'].map(w=>{const t=h('div',null,`<span>${w}</span>`,grid);t.style.cssText='position:relative;border-radius:14px;display:grid;place-items:center;font-weight:900;font-size:clamp(18px,3.4vw,28px);color:#e9e7e2;background:#24262c;padding:1px';return t});
+  let mx=-999,my=-999;api.on(st,'pointermove',e=>{mx=e.clientX;my=e.clientY});api.on(st,'pointerleave',()=>{mx=my=-9999});
+  api.frame(()=>{const c=`hsla(${P.hue},90%,65%,`;T.forEach(t=>{const r=t.getBoundingClientRect(),x=mx-r.left,y=my-r.top;
+    t.style.background=`radial-gradient(${P.rad}px circle at ${x}px ${y}px,${c}${P.amt}),transparent 70%) padding-box,radial-gradient(${P.rad*.8}px circle at ${x}px ${y}px,${c}${P.edge}),rgba(255,255,255,.06) 70%) border-box,#24262c`;t.style.border='1px solid transparent'})})}});
+
+def({n:75,cat:'O',title:'네온 선',hint:'커서를 위아래로',dark:true,bg:'radial-gradient(ellipse at 50% 40%,#0f2a4a,#060b16)',
+params:[['lines','선 개수',1,8,1,4,'개'],['amp','최대 진폭',10,150,5,70,'px'],['speed','흐름 속도',0,5,0.1,1.2,''],['glow','빛 번짐',0,40,1,18,'px'],['hue','네온 색상',0,360,5,195,'°']],
+spec:P=>`{${P.lines}개}의 색상 {${P.hue}°} 네온 곡선이 {${P.speed}} 속도로 흐른다. 커서가 위로 갈수록 진폭이 최대 {${P.amp}px}까지 커지고 아래로 갈수록 잔잔해진다. 각 선은 {${P.glow}px} 빛 번짐을 두른다.`,
+mount(st,P,api){const c=api.canvas();h('div','tip','커서를 위아래로 움직여 보세요',st).style.color='#9fc3ff';let k=.5,tk=.5;api.on(st,'pointermove',e=>{const p=api.pt(e);tk=1-p.y/p.h});
+  api.frame(t=>{const g=c.ctx;k=lerp(k,tk,.06);g.clearRect(0,0,c.W,c.H);g.globalCompositeOperation='lighter';
+    for(let i=0;i<P.lines;i++){g.beginPath();const ph=i*1.3,f=1+i*.35;for(let x=0;x<=c.W;x+=6){const y=c.H/2+Math.sin(x/c.W*TAU*f+t*P.speed*(1+i*.2)+ph)*P.amp*k*(.5+.5*Math.sin(x/c.W*Math.PI))+Math.sin(x*.013+t+i)*8;x?g.lineTo(x,y):g.moveTo(x,y)}
+      g.shadowBlur=P.glow;g.shadowColor=`hsl(${P.hue+i*8},100%,60%)`;g.strokeStyle=`hsla(${P.hue+i*8},100%,${70+i*3}%,.9)`;g.lineWidth=2;g.stroke();g.shadowBlur=0;g.strokeStyle='rgba(255,255,255,.8)';g.lineWidth=.8;g.stroke()}g.globalCompositeOperation='source-over'})}});
+
+def({n:76,cat:'O',title:'유리 굴절',hint:'커서 움직이기',
+params:[['zoom','배율',1,3,0.05,1.4,'배'],['size','구슬 지름',40,220,5,110,'px'],['follow','따라오는 속도',0.03,1,0.01,0.14,''],['angle','줄무늬 각도',0,180,5,45,'°']],
+spec:P=>`{${P.angle}°} 기울어진 색 줄무늬 위에 지름 {${P.size}px}의 유리 구슬이 {${P.follow}}의 속도로 커서를 따라다닌다. 구슬 속 줄무늬는 {${P.zoom}배} 확대되고 가장자리로 갈수록 휘어 보이며, 위쪽에 반사광이 맺힌다.`,
+mount(st,P,api){const c=api.canvas();const COL=['#e0573a','#f2f0ea','#2f9b8a','#f2f0ea','#efb63a','#f2f0ea','#273a6e','#f2f0ea'];let x=0,y=0,tx=0,ty=0,init=0;
+  api.on(st,'pointermove',e=>{const p=api.pt(e);tx=p.x;ty=p.y});
+  const stripes=(g,W,H)=>{g.save();g.translate(W/2,H/2);g.rotate(P.angle*Math.PI/180);const s=26,R=Math.hypot(W,H);for(let i=-R/s;i<R/s;i++){g.fillStyle=COL[((i%8)+8)%8|0];g.fillRect(i*s,-R,s+.5,R*2)}g.restore()};
+  const tip=h('div','tip','',st);tip.style.cssText+=';background:rgba(0,0,0,.55);color:#fff;left:12px;right:auto;bottom:12px;padding:4px 10px;border-radius:8px;opacity:1';
+  api.frame(()=>{const g=c.ctx,W=c.W,H=c.H;if(!init){init=1;x=tx=W/2;y=ty=H/2}x=lerp(x,tx,P.follow);y=lerp(y,ty,P.follow);stripes(g,W,H);const r=P.size/2;
+    g.save();g.beginPath();g.arc(x,y,r,0,TAU);g.clip();const n=6;for(let i=n;i>=1;i--){const rr=r*i/n,z=lerp(P.zoom*1.25,P.zoom*.85,i/n);g.save();g.beginPath();g.arc(x,y,rr,0,TAU);g.clip();g.translate(x,y);g.scale(z,z);g.translate(-x,-y);stripes(g,W,H);g.restore()}
+    const gr=g.createRadialGradient(x-r*.3,y-r*.4,r*.05,x,y,r);gr.addColorStop(0,'rgba(255,255,255,.55)');gr.addColorStop(.35,'rgba(255,255,255,.05)');gr.addColorStop(.85,'rgba(0,0,0,.05)');gr.addColorStop(1,'rgba(0,0,0,.35)');g.fillStyle=gr;g.fillRect(x-r,y-r,r*2,r*2);g.restore();
+    g.beginPath();g.ellipse(x,y+r+8,r*.8,6,0,0,TAU);g.fillStyle='rgba(0,0,0,.15)';g.fill();tip.textContent=`커서를 움직여 보세요 · 구슬 배율 ${P.zoom}배`})}});
+
+def({n:77,cat:'O',title:'크롬 광택',hint:'커서를 좌우로',dark:true,bg:'radial-gradient(ellipse at 50% 30%,#3a3d44,#111215)',
+params:[['bands','반사 띠 개수',2,8,1,4,'개'],['contrast','명암 대비',0.2,1,0.05,0.85,''],['shift','반사 이동량',0,200,5,100,'%'],['tilt','입체 기울기',0,35,1,14,'°']],
+spec:P=>`커서를 좌우로 움직이면 "CHROME" 글자와 금속 구슬 표면의 {${P.bands}개} 반사 띠가 커서 이동량의 {${P.shift}%}만큼 미끄러지고, 글자는 최대 {${P.tilt}°} 돌아간다. 밝고 어두운 띠의 대비는 {${P.contrast}}.`,
+mount(st,P,api){st.style.display='flex';st.style.alignItems='center';st.style.justifyContent='center';st.style.gap='4%';st.style.perspective='700px';
+  const ball=h('div',null,null,st),tx=h('div',null,'CHROME',st);ball.style.cssText='width:clamp(80px,17vw,130px);aspect-ratio:1;border-radius:50%;flex:none;box-shadow:0 18px 30px rgba(0,0,0,.5)';
+  tx.style.cssText='font:900 clamp(44px,10vw,84px)/1 Inter;letter-spacing:-.03em;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.15)';
+  h('div','tip','커서를 좌우로 움직여 보세요',st);let k=.5,tk=.5;api.on(st,'pointermove',e=>{const p=api.pt(e);tk=p.x/p.w});
+  api.frame(()=>{k=lerp(k,tk,.08);const c=P.contrast,hi=Math.round(255),lo=Math.round(lerp(150,15,c)),mid=Math.round(lerp(200,110,c));const st2=[];
+    for(let i=0;i<P.bands;i++){const o=i/P.bands*100;st2.push(`rgb(${lo},${lo},${lo+6}) ${o}%`,`rgb(${hi},${hi},${hi}) ${o+100/P.bands*.35}%`,`rgb(${mid},${mid},${mid+8}) ${o+100/P.bands*.6}%`)}
+    const grad=`linear-gradient(180deg,${st2.join(',')},rgb(${lo},${lo},${lo}) 100%)`,sh=(k-.5)*P.shift;
+    tx.style.backgroundImage=grad;tx.style.backgroundSize='100% 220%';tx.style.backgroundPosition=`0 ${50+sh}%`;tx.style.transform=`rotateY(${(k-.5)*2*P.tilt}deg)`;
+    ball.style.background=`radial-gradient(circle at ${30+k*40}% 26%,#fff 0 8%,transparent 22%),${grad.replace('180deg',`${170+(k-.5)*40}deg`)}`;ball.style.backgroundSize='100% 100%,100% 200%';ball.style.backgroundPosition=`0 0,0 ${50+sh}%`})}});
+
+def({n:78,cat:'O',title:'잉크 얼룩 번짐',hint:'화면 누르기',bg:'#f2ede2',
+params:[['size','얼룩 크기',20,200,5,80,'px'],['speed','번지는 속도',0.2,4,0.1,1,'배'],['rough','가장자리 거칠기',0,1,0.05,0.5,''],['drops','튀는 방울',0,20,1,6,'개']],
+spec:P=>`종이를 누른 자리에서 반지름 약 {${P.size}px}의 잉크 얼룩이 {${P.speed}배} 속도로 천천히 번져 나간다. 가장자리는 {${P.rough}}만큼 울퉁불퉁하고, 주변에 작은 방울 {${P.drops}개}가 튄다. 겹친 얼룩은 더 진해진다.`,
+mount(st,P,api){const c=api.canvas();st.style.cursor='pointer';const B=[];h('div','tip','눌러 보세요',st);
+  const blot=(x,y,R,col)=>{const n=72,ph=Array.from({length:4},()=>rnd(0,TAU));B.push({x,y,R,col,n,t:0,shape:Array.from({length:n},(_,i)=>{const a=i/n*TAU;return 1+P.rough*(.25*Math.sin(a*3+ph[0])+.15*Math.sin(a*7+ph[1])+.1*Math.sin(a*13+ph[2])+rnd(-.08,.08))})});if(B.length>40)B.shift()};
+  api.on(st,'pointerdown',e=>{const p=api.pt(e),hue=rnd(225,250);blot(p.x,p.y,P.size,`hsla(${hue},55%,22%,`);for(let i=0;i<P.drops;i++){const a=rnd(0,TAU),d=P.size*rnd(1.1,2.2);blot(p.x+Math.cos(a)*d,p.y+Math.sin(a)*d,P.size*rnd(.06,.18),`hsla(${hue},55%,22%,`)}});
+  api.frame((t,dt)=>{const g=c.ctx;g.clearRect(0,0,c.W,c.H);g.globalCompositeOperation='multiply';
+    for(const b of B){b.t+=dt*P.speed*.6;const k=1-Math.exp(-b.t*1.6);for(let L=0;L<3;L++){const rr=b.R*k*(1-L*.12);g.beginPath();for(let i=0;i<=b.n;i++){const a=i/b.n*TAU,r=rr*b.shape[i%b.n]*(1+L*.02*Math.sin(t+i));const X=b.x+Math.cos(a)*r,Y=b.y+Math.sin(a)*r;i?g.lineTo(X,Y):g.moveTo(X,Y)}
+      g.fillStyle=b.col+(L==0?.25:L==1?.3:.35)+')';g.fill()}}g.globalCompositeOperation='source-over'})}});
+
+def({n:79,cat:'O',title:'연기와 불꽃',hint:'커서를 불 가까이',dark:true,bg:'linear-gradient(#08080c,#141218)',
+params:[['base','기본 불 세기',0,1,0.05,0.4,''],['react','반응 거리',50,400,10,200,'px'],['smoke','연기 양',0,1,0.05,0.5,''],['wind','바람',-1,1,0.05,0,'']],
+spec:P=>`장작불이 평소엔 {${P.base}} 세기로 타다가, 커서가 불에서 {${P.react}px} 안으로 들어오면 가까울수록 불꽃이 커지고 많아진다. 불꽃 위로 {${P.smoke}}만큼 연기가 피어오르고, 바람 {${P.wind}}만큼 옆으로 휜다.`,
+mount(st,P,api){const c=api.canvas();const F=[],S=[];let mx=-999,my=-999,k=0;h('div',null,'불 가까이 가져가 보세요',st).style.cssText='position:absolute;top:14px;left:0;right:0;text-align:center;font-size:13px;opacity:.5';
+  api.on(st,'pointermove',e=>{const p=api.pt(e);mx=p.x;my=p.y});api.on(st,'pointerleave',()=>{mx=my=-999});
+  api.frame((t,dt)=>{const g=c.ctx,cx=c.W/2,cy=c.H-70;const d=Math.hypot(mx-cx,my-cy+40);k=lerp(k,clamp(P.base+(1-d/P.react)*.9,P.base,1.4),.06);
+    for(let i=0;i<k*14;i++)F.push({x:cx+rnd(-24,24)*(.6+k*.4),y:cy,vx:rnd(-12,12),vy:-rnd(60,150)*(.6+k),life:1,s:rnd(10,22)*(.6+k*.6)});
+    if(Math.random()<P.smoke*.6)S.push({x:cx+rnd(-10,10),y:cy-60*k-20,vx:rnd(-6,6),vy:-rnd(20,40),life:1,s:rnd(10,20)});
+    g.clearRect(0,0,c.W,c.H);const gl=g.createRadialGradient(cx,cy,10,cx,cy,180*(.5+k));gl.addColorStop(0,`rgba(255,120,40,${.25*k})`);gl.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gl;g.fillRect(0,0,c.W,c.H);
+    for(let i=S.length-1;i>=0;i--){const p=S[i];p.vx+=P.wind*30*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.s+=14*dt;p.life-=dt*.35;if(p.life<=0){S.splice(i,1);continue}g.fillStyle=`rgba(120,115,125,${p.life*.18})`;g.beginPath();g.arc(p.x,p.y,p.s,0,TAU);g.fill()}
+    g.globalCompositeOperation='lighter';for(let i=F.length-1;i>=0;i--){const p=F[i];p.vx+=(cx-p.x)*1.2*dt+P.wind*120*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt*1.6;if(p.life<=0){F.splice(i,1);continue}
+      const r=p.s*p.life,hue=lerp(10,48,p.life);const gr=g.createRadialGradient(p.x,p.y,0,p.x,p.y,r);gr.addColorStop(0,`hsla(${hue},100%,${55+p.life*25}%,${p.life*.55})`);gr.addColorStop(1,'hsla(10,100%,40%,0)');g.fillStyle=gr;g.beginPath();g.arc(p.x,p.y,r,0,TAU);g.fill()}
+    g.globalCompositeOperation='source-over';g.fillStyle='#5a3a26';g.save();g.translate(cx,cy+14);[-.25,.25,0].forEach((a,i)=>{g.save();g.rotate(a);g.fillStyle=i==2?'#6b4630':'#4f3322';g.fillRect(-60,-7,120,14);g.fillStyle='#b8834e';g.beginPath();g.arc(60,0,7,0,TAU);g.fill();g.restore()});g.restore()})}});
+
+def({n:80,cat:'O',title:'하늘 색이 바뀌는 하루',hint:'스크롤해 보기',
+params:[['arc','해 궤도 높이',0.2,1,0.05,0.7,''],['win','밤 창문 불빛',0,1,0.05,0.6,''],['stars','별 개수',0,200,5,80,'개',{r:1}],['sat','하늘 채도',0.3,1.5,0.05,1,'배']],
+spec:P=>`스크롤에 따라 새벽 → 한낮 → 노을 → 밤으로 하늘 색이 바뀐다(채도 {${P.sat}배}). 해는 높이 {${P.arc}}의 호를 그리며 지고, 밤이 되면 별 {${P.stars}개}가 나타나며 건물 창문의 {${Math.round(P.win*100)}%}에 불이 켜진다.`,
+mount(st,P,api){const s=api.scroll(5,'스크롤해 보세요');const c=api.canvas(s.view);
+  const K=[[0,'#2b3566','#e89a7b'],[.25,'#5fa8e8','#cfe8f7'],[.55,'#5f8fd6','#bfe0f2'],[.72,'#d9714a','#f4b46a'],[.86,'#3b2a55','#a35b6a'],[1,'#0b1028','#1f2650']];
+  const hx=s=>s.match(/\w\w/g).map(x=>parseInt(x,16));const at=(p,j)=>{let i=0;while(i<K.length-2&&p>K[i+1][0])i++;const a=K[i],b=K[i+1],t=clamp((p-a[0])/(b[0]-a[0]),0,1);return hx(a[j]).map((v,q)=>lerp(v,hx(b[j])[q],t))};
+  const ST=Array.from({length:P.stars},()=>[Math.random(),Math.random()*.6,rnd(.5,1.6)]);const BL=Array.from({length:12},(_,i)=>({w:rnd(.06,.11),h:rnd(.18,.5),win:Array.from({length:40},()=>Math.random())}));
+  const sat=([r,g,b])=>{const m=(r+g+b)/3;return[r,g,b].map(v=>clamp(m+(v-m)*P.sat,0,255)|0)};
+  api.frame(t=>{const g=c.ctx,W=c.W,H=c.H,p=s.p();const top=sat(at(p,1)),bot=sat(at(p,2));const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,`rgb(${top})`);gr.addColorStop(1,`rgb(${bot})`);g.fillStyle=gr;g.fillRect(0,0,W,H);
+    const night=clamp((p-.72)/.2,0,1);for(const [x,y,r] of ST){g.fillStyle=`rgba(255,255,240,${night*(.5+.5*Math.sin(t*2+x*50))})`;g.fillRect(x*W,y*H,r,r)}
+    const sa=lerp(-.05,1.05,clamp(p/.9,0,1))*Math.PI,sx=W/2-Math.cos(sa)*W*.42,sy=H*.92-Math.sin(sa)*H*.8*P.arc;g.fillStyle=`rgba(255,${lerp(200,240,Math.sin(sa))|0},${lerp(120,200,Math.sin(sa))|0},.95)`;g.beginPath();g.arc(sx,sy,24,0,TAU);g.fill();
+    if(night>0){g.fillStyle=`rgba(240,240,255,${night})`;g.beginPath();g.arc(W*.8,H*.18,14,0,TAU);g.fill()}
+    let x=0;BL.forEach((b,i)=>{const bw=b.w*W,bh=b.h*H;const shade=lerp(110,30,clamp(Math.abs(p-.4)*2.2,0,1));g.fillStyle=`rgb(${shade*.8|0},${shade*.7|0},${shade*.9|0})`;g.fillRect(x,H-bh,bw,bh);
+      let q=0;for(let yy=H-bh+10;yy<H-8;yy+=14)for(let xx=x+6;xx<x+bw-8;xx+=12){const on=b.win[q++%40]<P.win*night;g.fillStyle=on?'rgba(255,214,120,.95)':'rgba(255,255,255,.08)';g.fillRect(xx,yy,6,8)}x+=bw+2;if(x>W)return})})}});
+/* ───────── P 공간을 움직인다 ───────── */
+def({n:81,cat:'P',title:'무한 줌',hint:'스크롤해 보기',
+params:[['levels','스크롤 한 번에 들어가는 겹',1,6,1,3,'겹'],['ratio','액자 크기',0.25,0.5,0.01,0.36,'',{r:1}],['turn','겹마다 회전',0,20,1,0,'°',{r:1}],['depth','미리 그려 둔 겹',2,6,1,5,'겹',{r:1}]],
+spec:P=>`스크롤하면 전시실 벽의 액자 안으로 계속 들어간다. 액자 속에는 같은 전시실이 화면의 {${P.ratio}배} 크기로 들어 있어, 스크롤 전체 동안 {${P.levels}겹}을 지나며 끝없이 확대되는 것처럼 보인다. 겹마다 {${P.turn}°}씩 돌아가 있다.`,
+mount(st,P,api){const s=api.scroll(6,null);const v=s.view;v.style.background='#1a1a1c';
+  const room=()=>`<div style="position:absolute;inset:0;background:#efe9df"><div style="position:absolute;left:0;right:0;bottom:0;height:22%;background:#a77f57;border-top:4px solid #8a6644"></div><div style="position:absolute;left:5%;top:30%;width:15%;height:34%;background:#c8553a;border:5px solid #2b2b2b"><div style="margin:30% auto;width:56%;aspect-ratio:1;border-radius:50%;background:#f3d9a4"></div></div><div style="position:absolute;right:5%;top:28%;width:15%;height:36%;border:5px solid #2b2b2b;background:#f7f4ee;display:grid;grid-template-columns:1fr 1fr;gap:6%;padding:8%"><i style="background:#2f4b8a;grid-row:span 2"></i><i style="background:#e07f5a"></i><i style="background:#97b8d6"></i></div><div style="position:absolute;left:50%;top:6%;width:24%;height:6%;transform:translateX(-50%);background:radial-gradient(ellipse at top,rgba(255,240,200,.9),transparent 70%)"></div><div style="position:absolute;left:34%;right:34%;bottom:15%;height:3%;background:#3a3a3a;border-radius:3px"></div></div>`;
+  const wrap=h('div',null,null,v);wrap.style.cssText='position:absolute;inset:0;transform-origin:50% 50%';let cur=wrap;
+  for(let i=0;i<P.depth;i++){cur.insertAdjacentHTML('beforeend',room());const fr=h('div',null,null,cur);fr.style.cssText=`position:absolute;left:${50-P.ratio*50}%;top:${50-P.ratio*50}%;width:${P.ratio*100}%;height:${P.ratio*100}%;box-shadow:0 0 0 6px #2b2b2b,0 0 0 9px #c9a86a,0 10px 24px rgba(0,0,0,.25);overflow:hidden;transform:rotate(${P.turn}deg)`;cur=fr}
+  const tip=h('div','tip','스크롤하면 액자 안으로 들어갑니다',v);tip.style.cssText+=';background:rgba(0,0,0,.6);color:#fff;width:max-content;margin:auto;padding:5px 12px;border-radius:99px;opacity:1';
+  const lab=h('div',null,'',v);lab.style.cssText='position:absolute;left:12px;top:12px;background:rgba(0,0,0,.55);color:#fff;font:600 12px Inter;padding:4px 9px;border-radius:7px';
+  api.frame(()=>{const q=s.p()*P.levels,f=q%1;const sc=Math.pow(1/P.ratio,f);wrap.style.transform=`scale(${sc}) rotate(${-P.turn*f}deg)`;lab.textContent=`${Math.min(P.levels,Math.floor(q)+1)} / ${P.levels} 미술관`})}});
+
+def({n:82,cat:'P',title:'빛줄기 터널 비행',hint:'꾹 누르고 있기',dark:true,bg:'#05060b',
+params:[['count','별 개수',100,2000,50,700,'개',{r:1}],['base','평소 속도',0,2,0.05,0.3,''],['warp','최고 속도',1,20,0.5,9,''],['acc','가속',0.5,10,0.5,3,''],['hue','빛 색상',0,360,5,210,'°']],
+spec:P=>`우주 공간에 {${P.count}개}의 별이 평소 {${P.base}} 속도로 다가온다. 화면을 꾹 누르고 있으면 {${P.acc}}의 가속으로 최고 {${P.warp}}까지 빨라지며 별이 색상 {${P.hue}°} 빛줄기로 길게 늘어나고, 손을 떼면 서서히 원래 속도로 돌아온다.`,
+mount(st,P,api){const c=api.canvas();st.style.cursor='pointer';h('div','tip','꾹 누르고 있어 보세요',st).style.color='#9fb2ff';
+  const S=Array.from({length:P.count},()=>({x:rnd(-1,1),y:rnd(-1,1),z:rnd(.05,1)}));let sp=P.base,down=false;
+  api.on(st,'pointerdown',e=>{down=true;st.setPointerCapture(e.pointerId)});api.on(st,'pointerup',()=>down=false);api.on(st,'pointercancel',()=>down=false);
+  api.frame((t,dt)=>{const g=c.ctx,W=c.W,H=c.H,cx=W/2,cy=H/2,f=Math.max(W,H)*.5;sp=lerp(sp,down?P.warp:P.base,1-Math.exp(-P.acc*dt*(down?1:.6)));
+    g.fillStyle=`rgba(5,6,11,${clamp(.9-sp*.04,.35,.9)})`;g.fillRect(0,0,W,H);g.lineCap='round';
+    for(const o of S){const pz=o.z;o.z-=sp*dt*.4;if(o.z<=.02){o.x=rnd(-1,1);o.y=rnd(-1,1);o.z=1;continue}
+      const x1=cx+o.x/pz*f*.5,y1=cy+o.y/pz*f*.5,x2=cx+o.x/o.z*f*.5,y2=cy+o.y/o.z*f*.5;const b=1-o.z;
+      g.strokeStyle=`hsla(${P.hue+o.x*30},90%,${60+b*35}%,${b})`;g.lineWidth=b*2.2;g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke()}})}});
+
+def({n:83,cat:'P',title:'물체 회전 전시',hint:'드래그',bg:'radial-gradient(ellipse at 50% 35%,#fbfaf7,#dcd8cf)',
+params:[['sens','드래그 민감도',0.1,1.5,0.05,0.5,''],['inertia','관성',0.8,0.99,0.01,0.94,''],['auto','자동 회전',0,60,1,10,'°/초'],['faces','몸통 면 수',8,48,2,24,'면',{r:1}]],
+spec:P=>`원통형 스피커가 받침 위에서 초당 {${P.auto}°}로 천천히 돈다. 좌우로 드래그하면 손을 따라 {${P.sens}} 민감도로 돌아가고, 놓으면 관성 {${P.inertia}}로 미끄러지듯 서서히 멈춘 뒤 자동 회전으로 돌아간다. 몸통은 {${P.faces}개} 면으로 만든 입체.`,
+mount(st,P,api){st.style.perspective='900px';st.style.cursor='grab';const N=P.faces,R=70,Hh=170,fw=2*R*Math.tan(Math.PI/N)+1;
+  const obj=h('div',null,null,st);obj.style.cssText=`position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d`;
+  for(let i=0;i<N;i++){const f=h('div',null,null,obj);const lit=Math.round(40+30*Math.cos(i/N*TAU));f.style.cssText=`position:absolute;width:${fw}px;height:${Hh}px;left:${-fw/2}px;top:${-Hh/2-10}px;transform:rotateY(${i*360/N}deg) translateZ(${R}px);backface-visibility:hidden;background:repeating-linear-gradient(0deg,rgba(0,0,0,.35) 0 2px,transparent 2px 5px),linear-gradient(#3a3c41,#2a2b2f)`;
+    f.dataset.i=i;if(i===0)f.innerHTML=`<div style="position:absolute;left:50%;top:40%;width:6px;height:50px;margin-left:-3px;border-radius:3px;background:linear-gradient(#ffb34a,#e0573a);box-shadow:0 0 10px #ff9a3a"></div><div style="position:absolute;left:50%;top:16px;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:#bbb"></div>`}
+  const cap=h('div',null,null,obj);cap.style.cssText=`position:absolute;width:${R*2}px;height:${R*2}px;left:${-R}px;top:${-R}px;border-radius:50%;background:radial-gradient(#4a4c52,#26272b);transform:translateY(${-Hh/2-10}px) rotateX(90deg)`;
+  const base=h('div',null,null,obj);base.style.cssText=`position:absolute;width:${R*2+16}px;height:${R*2+16}px;left:${-R-8}px;top:${-R-8}px;border-radius:50%;background:#f4f1ea;box-shadow:inset 0 0 0 2px #ddd8cc;transform:translateY(${Hh/2-8}px) rotateX(90deg)`;
+  const sh=h('div',null,null,st);sh.style.cssText='position:absolute;left:50%;top:50%;width:200px;height:26px;margin:96px 0 0 -100px;border-radius:50%;background:radial-gradient(rgba(0,0,0,.25),transparent 70%)';h('div','tip','드래그해 보세요',st);
+  const faces=[...obj.children].filter(e=>e.dataset.i!=null);let a=0,v=0,drag=false,lx=0,idle=1;
+  api.on(st,'pointerdown',e=>{drag=true;lx=e.clientX;v=0;st.setPointerCapture(e.pointerId);st.style.cursor='grabbing'});
+  api.on(st,'pointermove',e=>{if(!drag)return;const d=e.clientX-lx;lx=e.clientX;a+=d*P.sens;v=d*P.sens*60});
+  const up=()=>{drag=false;st.style.cursor='grab'};api.on(st,'pointerup',up);api.on(st,'pointercancel',up);
+  api.frame((t,dt)=>{if(!drag){a+=v*dt;v*=Math.pow(P.inertia,dt*60);if(Math.abs(v)<P.auto)v=lerp(v,P.auto,.03)}obj.style.transform=`rotateX(-12deg) rotateY(${a}deg)`;
+    faces.forEach(f=>{const ang=(+f.dataset.i*360/N+a)*Math.PI/180;f.style.filter=`brightness(${(.7+.6*Math.max(0,Math.cos(ang+.6))).toFixed(2)})`})})}});
+
+def({n:84,cat:'P',title:'분해도',hint:'스크롤해 보기',
+params:[['gap','최대 간격',20,120,2,70,'px'],['tilt','시점 기울기',30,75,1,58,'°'],['spin','돌려 본 각도',0,90,1,45,'°'],['stag','층별 시차',0,0.8,0.05,0.3,'']],
+spec:P=>`스크롤을 내리면 기기가 층별로 위아래로 벌어지며 최대 {${P.gap}px} 간격의 분해도가 되고, 올리면 다시 합쳐진다. 위에서 {${P.tilt}°} 내려다보고 {${P.spin}°} 돌린 시점이며, 층마다 {${P.stag}} 시차를 두고 움직이고 이름표가 붙는다.`,
+mount(st,P,api){const s=api.scroll(4,null);const v=s.view;v.style.perspective='1000px';
+  h('div',null,'아래로 스크롤하면 분해, 위로 올리면 다시 합쳐집니다',v).style.cssText='position:absolute;top:12px;left:0;right:0;text-align:center;font-size:13px;opacity:.6';
+  const pct=h('div',null,'분해 0%',v);pct.style.cssText='position:absolute;bottom:12px;left:0;right:0;text-align:center;font:600 12px Inter;opacity:.6';
+  const sc=h('div',null,null,v);sc.style.cssText='position:absolute;left:50%;top:54%;transform-style:preserve-3d';
+  const Ly=[['덮개','#2d2f34','<div style="position:absolute;inset:20%;border-radius:10px;background:#3a3d43"></div>'],['기판','#3d8a5a','<div style="position:absolute;left:12%;top:16%;width:22%;height:22%;background:#1f2328"></div><div style="position:absolute;left:44%;top:16%;width:22%;height:22%;background:#1f2328"></div><div style="position:absolute;right:10%;top:20%;width:14%;height:12%;background:#e6b93a"></div><div style="position:absolute;left:12%;bottom:14%;right:12%;height:3px;background:#a7d8b4"></div>'],['배터리','#c9ccd3','<div style="position:absolute;inset:12%;display:grid;grid-template-columns:repeat(4,1fr);gap:6%"><i style="background:#aeb3bc"></i><i style="background:#aeb3bc"></i><i style="background:#aeb3bc"></i><i style="background:#aeb3bc"></i></div>'],['바닥','#2a2b2f','<div style="position:absolute;left:30%;right:30%;bottom:16%;height:6%;border-radius:4px;background:#e0573a"></div>']];
+  const TG=Ly.map(([n])=>{const t=h('span',null,n,v);t.style.cssText="position:absolute;left:0;top:0;z-index:4;white-space:nowrap;font:600 12px 'Noto Sans KR';color:#17171a;background:#fff;padding:3px 9px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.15);transition:opacity .2s;opacity:0";return t});
+  const E=Ly.map(([n,c,inner],i)=>{const l=h('div',null,inner,sc);l.style.cssText=`position:absolute;width:180px;height:180px;left:-90px;top:-90px;border-radius:22px;background:${c};box-shadow:0 0 0 1px rgba(0,0,0,.2),0 6px 0 rgba(0,0,0,.25)`;return l});
+  api.frame(()=>{const p=s.p();sc.style.transform=`rotateX(${P.tilt}deg) rotateZ(${P.spin}deg)`;const n=E.length;
+    E.forEach((l,i)=>{const t=easeIO(clamp((p*1.2-(n-1-i)/n*P.stag)/(1-P.stag+1e-3),0,1));const z=((n-1)/2-i)*(10+P.gap*t);l.style.transform=`translateZ(${z}px)`;const lab=TG[i],vr=v.getBoundingClientRect(),lr=l.getBoundingClientRect();lab.style.opacity=t>.3?1:0;lab.style.transform=`translate(${Math.min(lr.right-vr.left+12,vr.width-80)}px,${lr.top+lr.height/2-vr.top-12}px)`});pct.textContent=`분해 ${Math.round(p*100)}%`})}});
+
+def({n:85,cat:'P',title:'스크롤로 걷는 실내',hint:'스크롤해 보기',
+params:[['len','복도 길이',1000,4000,100,2400,'px',{r:1}],['fov','시야 원근',200,1200,20,480,'px'],['bob','걸음 흔들림',0,12,0.5,4,'px'],['smooth','걸음 부드러움',0.03,1,0.01,0.12,'']],
+spec:P=>`스크롤하면 길이 {${P.len}px}의 선으로 그린 복도를 따라 앞으로 걸어 들어간다. 원근 {${P.fov}px}의 시야로 문과 계단이 다가오고, 걸을 때 화면이 {${P.bob}px}씩 위아래로 흔들린다. 이동은 {${P.smooth}} 비율로 부드럽게 따라오며, 지나는 공간 이름이 카드로 바뀐다.`,
+mount(st,P,api){const s=api.scroll(6,'스크롤해 보세요');const v=s.view;v.style.background='#f6f3ec';const W=360,Hh=260,L=P.len;
+  const scene=h('div',null,null,v);scene.style.cssText='position:absolute;inset:0;overflow:hidden';const world=h('div',null,null,scene);world.style.cssText='position:absolute;left:50%;top:50%;transform-style:preserve-3d';
+  const pl=(css,tf,inner='')=>{const e=h('div',null,inner,world);e.style.cssText='position:absolute;border:1.5px solid #3b3b3b;background:#fbfaf6;'+css;e.style.transform=tf;return e};
+  let doors='';for(let z=200;z<L-300;z+=420)doors+=`<div style="position:absolute;left:${z}px;bottom:0;width:90px;height:190px;border:1.5px solid #3b3b3b;border-bottom:0"><i style="position:absolute;right:10px;top:95px;width:6px;height:6px;border-radius:50%;background:#3b3b3b"></i></div>`;
+  let floor='';for(let z=0;z<L;z+=60)floor+=`<i style="position:absolute;left:0;right:0;top:${z}px;border-top:1px solid rgba(0,0,0,.15)"></i>`;
+  pl(`width:${L}px;height:${Hh}px;left:${-L/2}px;top:${-Hh/2}px`,`translateX(${-W/2}px) rotateY(90deg)`,doors);
+  pl(`width:${L}px;height:${Hh}px;left:${-L/2}px;top:${-Hh/2}px`,`translateX(${W/2}px) rotateY(-90deg)`,doors);
+  pl(`width:${W}px;height:${L}px;left:${-W/2}px;top:${-L/2}px;background:#f0ebe0`,`translateY(${Hh/2}px) rotateX(90deg)`,floor);
+  pl(`width:${W}px;height:${L}px;left:${-W/2}px;top:${-L/2}px`,`translateY(${-Hh/2}px) rotateX(90deg)`,`<i style="position:absolute;left:40%;right:40%;top:30%;height:40px;border:1.5px solid #3b3b3b"></i><i style="position:absolute;left:40%;right:40%;top:60%;height:40px;border:1.5px solid #3b3b3b"></i>`);
+  let steps='';for(let i=0;i<10;i++)steps+=`<i style="position:absolute;left:0;right:0;bottom:${i*18}px;height:18px;border-top:1.5px solid #3b3b3b;margin:0 ${i*6}px"></i>`;
+  pl(`width:${W}px;height:${Hh}px;left:${-W/2}px;top:${-Hh/2}px`,`translateZ(${-L/2}px)`,steps);
+  const card=h('div',null,'',v);card.style.cssText='position:absolute;right:12px;top:12px;background:#fff;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.15);padding:8px 12px;font-size:13px;transform:rotate(3deg)';
+  const N=['복도','첫 번째 방','긴 통로','계단 앞'];let q=0;
+  api.frame(()=>{q=lerp(q,s.p(),P.smooth);const z=-L/2+60+q*(L-260);scene.style.perspective=P.fov+'px';const b=Math.sin(q*L/60)*P.bob;world.style.transform=`translateY(${b}px) translateZ(${-z}px)`;
+    card.innerHTML=`<b style="color:#e0573a;font-family:Inter">0${Math.min(4,Math.floor(q*4)+1)}</b> ${N[Math.min(3,Math.floor(q*4))]}`})}});
+
+def({n:86,cat:'P',title:'유리구슬 속 장면',hint:'구슬을 잡아 흔들기',dark:true,bg:'radial-gradient(ellipse at 50% 30%,#2c3a6a,#121831)',
+params:[['snow','눈송이 수',50,600,10,220,'개',{r:1}],['fall','가라앉는 속도',5,80,1,18,'px/초'],['shake','흔들림 민감도',0.2,3,0.1,1,'배'],['spring','제자리 복원',0.02,0.3,0.01,0.1,'']],
+spec:P=>`스노우볼을 잡고 흔들면 손의 움직임이 {${P.shake}배}로 전해져 안의 눈송이 {${P.snow}개}가 휘몰아치고, 놓으면 구슬은 {${P.spring}} 세기로 제자리로 돌아온다. 눈송이는 초당 {${P.fall}px} 속도로 천천히 가라앉아 바닥에 쌓인다.`,
+mount(st,P,api){const c=api.canvas();st.style.cursor='grab';h('div','tip','구슬을 잡고 흔들어 보세요',st).style.color='#c9d3ff';
+  const S=Array.from({length:P.snow},()=>({x:rnd(-1,1),y:rnd(-1,1),vx:0,vy:0,r:rnd(1,2.6)}));let gx=0,gy=0,vx=0,vy=0,drag=false,ox=0,oy=0,pgx=0,pgy=0;
+  api.on(st,'pointerdown',e=>{drag=true;const p=api.pt(e);ox=p.x-gx;oy=p.y-gy;st.setPointerCapture(e.pointerId)});api.on(st,'pointermove',e=>{if(!drag)return;const p=api.pt(e);gx=clamp(p.x-ox,-120,120);gy=clamp(p.y-oy,-70,70)});
+  const up=()=>drag=false;api.on(st,'pointerup',up);api.on(st,'pointercancel',up);
+  api.frame((t,dt)=>{const g=c.ctx,W=c.W,H=c.H,R=Math.min(110,H*.33),cx=W/2+gx,cy=H*.44+gy;if(!drag){vx=(vx-gx*P.spring)*.82;vy=(vy-gy*P.spring)*.82;gx+=vx;gy+=vy}
+    const ax=(gx-pgx)/Math.max(dt,.001),ay=(gy-pgy)/Math.max(dt,.001);pgx=gx;pgy=gy;
+    for(const o of S){o.vx-=ax*.00012*P.shake;o.vy-=ay*.00012*P.shake;o.vy+=P.fall/R*dt*.6;o.vx*=.97;o.vy*=.97;o.x+=o.vx*dt*3;o.y+=o.vy*dt*3;const d=Math.hypot(o.x,o.y);
+      if(o.y>.55){o.y=.55;o.vy*=-.2}if(d>.95){o.x*=.95/d;o.y*=.95/d;o.vx*=-.4;o.vy*=-.4}}
+    g.clearRect(0,0,W,H);g.fillStyle='rgba(0,0,0,.3)';g.beginPath();g.ellipse(W/2+gx*.3,H*.44+R+52,R*.9,10,0,0,TAU);g.fill();
+    g.fillStyle='#7a4a2a';g.beginPath();g.moveTo(cx-R*.78,cy+R*.62);g.lineTo(cx+R*.78,cy+R*.62);g.lineTo(cx+R*.95,cy+R+40);g.lineTo(cx-R*.95,cy+R+40);g.closePath();g.fill();g.fillStyle='rgba(255,255,255,.12)';g.fillRect(cx-R*.6,cy+R*.75,R*.2,R*.5);
+    g.save();g.beginPath();g.arc(cx,cy,R,0,TAU);g.clip();const bg=g.createRadialGradient(cx,cy-R*.3,10,cx,cy,R);bg.addColorStop(0,'#6f86d6');bg.addColorStop(1,'#2a3a78');g.fillStyle=bg;g.fillRect(cx-R,cy-R,R*2,R*2);
+    g.fillStyle='#eef3ff';g.beginPath();g.ellipse(cx,cy+R*.62,R*.95,R*.22,0,0,TAU);g.fill();
+    g.fillStyle='#8b4a2e';g.fillRect(cx-22,cy+R*.2,44,30);g.fillStyle='#c0392b';g.beginPath();g.moveTo(cx-28,cy+R*.2);g.lineTo(cx,cy+R*.2-26);g.lineTo(cx+28,cy+R*.2);g.fill();g.fillStyle='#ffd27a';g.fillRect(cx-8,cy+R*.2+10,10,10);
+    [[-58,.25],[50,.3],[-30,.4],[70,.45]].forEach(([dx,k])=>{g.fillStyle='#2f6b4a';g.beginPath();g.moveTo(cx+dx,cy+R*k-30);g.lineTo(cx+dx-12,cy+R*k+8);g.lineTo(cx+dx+12,cy+R*k+8);g.fill()});
+    g.fillStyle='#fff';for(const o of S){g.globalAlpha=.85;g.beginPath();g.arc(cx+o.x*R,cy+o.y*R,o.r,0,TAU);g.fill()}g.globalAlpha=1;g.restore();
+    g.strokeStyle='rgba(255,255,255,.35)';g.lineWidth=2;g.beginPath();g.arc(cx,cy,R,0,TAU);g.stroke();g.strokeStyle='rgba(255,255,255,.5)';g.lineWidth=5;g.beginPath();g.arc(cx,cy,R*.82,-2.6,-2.0);g.stroke()})}});
+/* ───────── Q 화면이 바뀐다 ───────── */
+const SUNSET='data:image/svg+xml,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" preserveAspectRatio="none"><defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5b2a6e"/><stop offset=".35" stop-color="#c0507a"/><stop offset=".6" stop-color="#f29a6b"/><stop offset=".75" stop-color="#ffd08a"/><stop offset="1" stop-color="#4a2a5a"/></linearGradient></defs><rect width="600" height="600" fill="url(#s)"/><circle cx="300" cy="380" r="70" fill="#ffe6b0"/><path d="M0 420 L120 360 L220 410 L330 340 L450 400 L600 350 V600 H0Z" fill="#7a3b6a"/><path d="M0 470 L150 430 L300 480 L460 420 L600 460 V600 H0Z" fill="#4a2350"/><path d="M0 520 Q300 490 600 520 V600 H0Z" fill="#2d1638"/><g fill="#ffe6b0" opacity=".6"><rect x="270" y="500" width="60" height="3"/><rect x="250" y="515" width="100" height="3"/></g></svg>`);
+def({n:87,cat:'Q',title:'글자 속 사진',hint:'스크롤해 보기',
+params:[['zoom','끝 확대',1,6,0.1,3,'배'],['para','배경 이동',0,200,5,80,'px'],['size','글자 크기',40,140,2,88,'px']],
+spec:P=>`"OCEAN DRIFT LIGHT" 글자 모양으로 노을 그림이 오려져 보인다. 스크롤하면 글자 안의 그림이 {${P.para}px} 위로 미끄러지고, 끝부분에서 글자 전체가 {${P.zoom}배}로 커지며 그림이 화면을 채운다. 글자 크기 {${P.size}px}.`,
+mount(st,P,api){const s=api.scroll(5,'스크롤해 보세요');const v=s.view;v.style.background='#f3efe8';
+  const t=h('div',null,'OCEAN<br>DRIFT<br>LIGHT',v);t.style.cssText=`position:absolute;left:50%;top:50%;text-align:center;font:900 ${P.size}px/.92 Inter;letter-spacing:-.03em;color:transparent;-webkit-background-clip:text;background-clip:text;background-image:url("${SUNSET}");background-size:100% 160%;transform-origin:center;white-space:nowrap`;
+  const full=h('div',null,null,v);full.style.cssText=`position:absolute;inset:0;background:url("${SUNSET}") center/cover;opacity:0`;
+  api.frame(()=>{const p=s.p(),z=lerp(1,P.zoom,easeIO(clamp((p-.55)/.45,0,1)));t.style.fontSize=P.size+'px';t.style.backgroundPosition=`50% ${p*P.para}%`;t.style.transform=`translate(-50%,-50%) scale(${z})`;full.style.opacity=clamp((p-.88)/.12,0,1)})}});
+
+def({n:88,cat:'Q',title:'색 한 판이 덮는 전환',hint:'다음 누르기',
+params:[['dur','전환 전체 시간',0.3,2,0.05,0.9,'초'],['dir','덮는 방향',0,3,1,0,'',{L:['왼→오','위→아래','대각선','원형']}],['hold','덮은 채 머묾',0,0.6,0.05,0.1,'초'],['layers','색판 겹',1,3,1,2,'겹']],
+spec:P=>`"다음"을 누르면 {${P.layers}겹}의 색판이 {${['왼쪽에서 오른쪽으로','위에서 아래로','대각선으로','가운데서 원형으로'][P.dir]}} 화면을 덮고, {${P.hold}초} 머무는 동안 장면이 바뀐 뒤 반대쪽으로 빠져나간다. 전체 {${P.dur}초}.`,
+mount(st,P,api){const SC=[['#24375e','장면 1','다음 버튼을 누르세요'],['#e0573a','장면 2','색판이 화면을 덮었다 걷힙니다'],['#2f8f77','장면 3','방향과 겹 수를 바꿔 보세요'],['#f2c14e','장면 4','다시 처음으로']];let i=0,busy=0;
+  const sc=h('div',null,null,st);sc.style.cssText='position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:#fff';
+  const show=()=>{const [c,a,b]=SC[i];sc.style.background=c;sc.style.color=i==3?'#17171a':'#fff';sc.innerHTML=`<div><div style="font-size:clamp(34px,7vw,52px);font-weight:900">${a}</div><div style="opacity:.75;font-size:14px">${b}</div></div>`};show();
+  const btn=h('button',null,'다음 →',st);btn.style.cssText='position:absolute;right:16px;bottom:16px;z-index:9;border:0;border-radius:999px;background:#fff;color:#17171a;font:700 14px "Noto Sans KR";padding:12px 20px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.2)';
+  const CL=['#17171a','#f5c76b','#ffffff'];
+  api.on(btn,'click',()=>{if(busy)return;busy=1;const n=P.layers,half=P.dur*1000/2,d=P.dir;const pans=[];
+    for(let k=0;k<n;k++){const p=h('div',null,null,st);p.style.cssText=`position:absolute;inset:0;z-index:${5+k};background:${CL[k]}`;const from=d==0?'inset(0 100% 0 0)':d==1?'inset(0 0 100% 0)':d==2?'polygon(0 0,0 0,0 0)':'circle(0% at 50% 50%)',full=d==2?'polygon(0 0,200% 0,0 200%)':d==3?'circle(75% at 50% 50%)':'inset(0 0 0 0)';
+      p.style.clipPath=from;p.dataset.full=full;p.dataset.out=d==0?'inset(0 0 0 100%)':d==1?'inset(100% 0 0 0)':d==2?'polygon(100% 100%,100% 100%,100% 100%)':'circle(0% at 50% 50%)';pans.push(p)}
+    requestAnimationFrame(()=>pans.forEach((p,k)=>{p.style.transition=`clip-path ${half*.8}ms cubic-bezier(.7,0,.3,1) ${k*half*.2/n}ms`;p.style.clipPath=p.dataset.full}));
+    api.later(()=>{i=(i+1)%SC.length;show();api.later(()=>{pans.slice().reverse().forEach((p,k)=>{requestAnimationFrame(()=>{p.style.transitionDelay=k*half*.2/n+'ms';p.style.clipPath=p.dataset.out})});api.later(()=>{pans.forEach(p=>p.remove());busy=0},half+80)},P.hold*1000)},half)})}});
+
+def({n:89,cat:'Q',title:'페이지 넘김',hint:'오른쪽 끝을 왼쪽으로 끌기',bg:'#d9d4c8',
+params:[['shade','넘김 그림자',0,1,0.05,0.6,''],['snap','놓은 뒤 마무리',0.1,1,0.05,0.45,'초'],['persp','원근',400,2400,50,1200,'px'],['th','넘어가는 기준',0.1,0.9,0.05,0.5,'']],
+spec:P=>`잡지 오른쪽 페이지를 잡고 왼쪽으로 끌면 페이지가 가운데 접선을 축으로 {${P.persp}px} 원근 속에서 손을 따라 넘어가고, 접히는 쪽에 {${P.shade}} 세기의 그림자가 진다. {${Math.round(P.th*100)}%} 이상 끌고 놓으면 {${P.snap}초} 동안 마저 넘어가고, 덜 끌면 제자리로 돌아온다.`,
+mount(st,P,api){const PG=[['TRAVEL','바다로 가는 길','#fbefe6','#e0573a'],['STYLE','오후의 빛','#8aa6e8','#fff'],['FOOD','여름 식탁','#f4e3b5','#7a4a1a'],['PEOPLE','작업실 사람들','#2f3b52','#f5c76b'],['SOUND','저녁의 소리','#e9d6ef','#5a2a6a'],['END','다음 호에서','#17171a','#fff']];
+  const pg=k=>{const p=PG[((k%PG.length)+PG.length)%PG.length];return`<div style="position:absolute;inset:0;background:${p[2]};color:${p[3]};padding:16px"><div style="font:700 10px Inter;letter-spacing:.15em;opacity:.7">${p[0]}</div><div style="font-size:clamp(15px,3vw,22px);font-weight:900;line-height:1.15;margin-top:4px">${p[1]}</div><div style="margin-top:12px;height:38%;border-radius:4px;background:linear-gradient(160deg,rgba(255,255,255,.4),rgba(0,0,0,.25))"></div>${'<i style="display:block;height:3px;margin-top:7px;background:currentColor;opacity:.18"></i>'.repeat(5)}<div style="position:absolute;bottom:10px;right:14px;font:500 10px Inter;opacity:.5">${k+1}</div></div>`};
+  const book=h('div',null,null,st);book.style.cssText='position:absolute;left:50%;top:50%;width:min(86%,460px);aspect-ratio:1.5;transform:translate(-50%,-52%);transform-style:preserve-3d';
+  const L=h('div',null,null,book),Rt=h('div',null,null,book),leaf=h('div',null,null,book);
+  [L,Rt].forEach((e,i)=>e.style.cssText=`position:absolute;top:0;bottom:0;width:50%;${i?'right:0':'left:0'};overflow:hidden;box-shadow:0 10px 24px rgba(0,0,0,.2)`);
+  leaf.style.cssText='position:absolute;top:0;bottom:0;right:0;width:50%;transform-origin:left center;transform-style:preserve-3d;cursor:grab;z-index:3';
+  const fr=h('div',null,null,leaf),bk=h('div',null,null,leaf);[fr,bk].forEach((e,i)=>e.style.cssText=`position:absolute;inset:0;overflow:hidden;backface-visibility:hidden;${i?'transform:rotateY(180deg)':''}`);
+  const shF=h('div',null,null,fr),shB=h('div',null,null,bk);h('div','tip','오른쪽 페이지를 왼쪽으로 끌어 보세요',st);
+  let k=0,a=0,drag=false,anim=null;
+  const render=()=>{L.innerHTML=pg(k);Rt.innerHTML=pg(k+3);fr.innerHTML=pg(k+1);bk.innerHTML=pg(k+2);fr.appendChild(shF);bk.appendChild(shB);[shF,shB].forEach(e=>e.style.cssText='position:absolute;inset:0;pointer-events:none')};render();
+  api.on(leaf,'pointerdown',e=>{drag=true;anim=null;leaf.setPointerCapture(e.pointerId);leaf.style.cursor='grabbing'});
+  api.on(leaf,'pointermove',e=>{if(!drag)return;const r=book.getBoundingClientRect(),cx=r.left+r.width/2,x=clamp((cx+r.width/2-e.clientX)/r.width,0,1);a=x*180});
+  const up=()=>{if(!drag)return;drag=false;leaf.style.cursor='grab';const go=a/180>P.th;anim={from:a,to:go?180:0,t:0,go}};api.on(leaf,'pointerup',up);api.on(leaf,'pointercancel',up);
+  api.frame((t,dt)=>{if(anim){anim.t+=dt/P.snap;const e=ease(clamp(anim.t,0,1));a=lerp(anim.from,anim.to,e);if(anim.t>=1){if(anim.go){k+=2;render()}a=0;anim=null}}
+    book.style.perspective=P.persp+'px';leaf.style.transform=`rotateY(${-a}deg)`;const s=Math.sin(a*Math.PI/180);
+    shF.style.background=`linear-gradient(90deg,rgba(0,0,0,${P.shade*s*.6}),transparent 60%)`;shB.style.background=`linear-gradient(270deg,rgba(0,0,0,${P.shade*s*.6}),transparent 60%)`;
+    Rt.style.filter=`brightness(${1-P.shade*.35*s})`})}});
+
+def({n:90,cat:'Q',title:'박자 컷',hint:'음악 켜기',
+params:[['bpm','빠르기',60,180,1,110,'BPM'],['cut','몇 박마다 컷',1,4,1,1,'박'],['punch','박자 펀치',0,0.3,0.01,0.08,''],['vol','음량',0,1,0.05,0.5,'']],
+spec:P=>`"음악 켜기"를 누르면 {${P.bpm}BPM} 비트가 나오고, {${P.cut}박}마다 화면이 다음 장면(색·단어·도형)으로 딱 끊어 바뀐다. 매 박자마다 화면 요소가 {${P.punch}}만큼 크게 튀었다 돌아온다. 음량 {${P.vol}}.`,
+mount(st,P,api){const SC=[['#ef5a3c','#fdf2e6','울림'],['#17171a','#f5c76b','박자'],['#2f6fe0','#fff','컷!'],['#f5c76b','#17171a','다음'],['#2b9a7a','#fff','리듬']];
+  const bg=h('div',null,null,st),word=h('div',null,null,st),circ=h('div',null,null,st);bg.style.cssText='position:absolute;inset:0';circ.style.cssText='position:absolute;right:-10%;top:-20%;width:62%;aspect-ratio:1;border-radius:50%';
+  word.style.cssText='position:absolute;left:6%;bottom:12%;font:900 clamp(64px,15vw,120px)/1 "Noto Sans KR";letter-spacing:-.04em;transform-origin:left bottom';
+  const btn=h('button',null,'음악 켜기',st);btn.style.cssText='position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:5;border:0;border-radius:999px;background:#fff;color:#17171a;font:700 13px "Noto Sans KR";padding:10px 18px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.2)';
+  let i=0,beat=0,on=false,ac=null,next=0,pun=0,lastBeatAt=0;const draw=()=>{const s=SC[i];bg.style.background=s[0];word.style.color=s[2]=='다음'?'#17171a':s[1];word.textContent=s[2];circ.style.background=s[1];circ.style.opacity=.9};draw();
+  const kick=(t)=>{const o=ac.createOscillator(),g=ac.createGain();o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(40,t+.15);g.gain.setValueAtTime(P.vol,t);g.gain.exponentialRampToValueAtTime(.001,t+.25);o.connect(g).connect(ac.destination);o.start(t);o.stop(t+.3)};
+  const hat=(t)=>{const b=ac.createBuffer(1,ac.sampleRate*.05,ac.sampleRate),d=b.getChannelData(0);for(let j=0;j<d.length;j++)d[j]=(Math.random()*2-1)*(1-j/d.length);const s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();f.type='highpass';f.frequency.value=7000;g.gain.value=P.vol*.35;s.buffer=b;s.connect(f).connect(g).connect(ac.destination);s.start(t)};
+  api.on(btn,'click',async()=>{on=!on;btn.textContent=on?'음악 끄기':'음악 켜기';if(on){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();await ac.resume();next=ac.currentTime+.05}catch(e){ac=null;next=performance.now()/1000}beat=0}});
+  api.clean(()=>{try{ac&&ac.close()}catch(e){}});
+  api.frame((t,dt)=>{pun*=Math.pow(.001,dt);word.style.transform=`scale(${1+pun})`;circ.style.transform=`scale(${1+pun*1.6})`;if(!on)return;
+    const now=ac?ac.currentTime:t,spb=60/P.bpm;while(next<now+.1){if(ac){kick(next);hat(next+spb/2)}const when=next;const b=beat++;setTimeout(()=>{pun=P.punch;if(b%P.cut===0){i=(i+1)%SC.length;draw()}},Math.max(0,(when-now)*1000));next+=spb}})}});
+
+def({n:91,cat:'Q',title:'화면 속 화면',hint:'작은 화면 누르기',
+params:[['dur','들어가는 시간',0.3,2,0.05,0.8,'초'],['over','넘침',0,1,0.05,0.2,''],['blur','바깥 흐림',0,10,0.5,4,'px']],
+spec:P=>`바깥 장면 가운데 놓인 작은 휴대폰 화면을 누르면 카메라가 {${P.dur}초} 동안 그 화면 속으로 확대되어 들어가 화면이 전체가 되고, 바깥은 {${P.blur}px} 흐려진다. 도착할 때 {${P.over}}만큼 살짝 넘쳤다 멈추며, 다시 누르면 빠져나온다.`,
+mount(st,P,api){st.style.background='#efe9df';
+  const world=h('div',null,`<div style="position:absolute;left:5%;top:7%;font-weight:900;font-size:18px">바깥</div><div style="position:absolute;right:6%;top:9%;width:24%;height:5px;background:#2b2b2b;border-radius:3px"></div><div style="position:absolute;right:6%;top:13%;width:16%;height:5px;background:#9a948a;border-radius:3px"></div><div style="position:absolute;left:8%;bottom:16%;width:6px;height:28%;background:#e0573a;border-radius:3px"></div><div style="position:absolute;left:15%;bottom:12%;width:40px;height:40px;border-radius:50%;background:#2f8f77"></div><div style="position:absolute;right:-6%;bottom:-14%;width:30%;aspect-ratio:1;border-radius:50%;background:#ee7d5f"></div>`,st);
+  world.style.cssText='position:absolute;inset:0;transform-origin:50% 50%';
+  const ph=h('div',null,null,world);ph.style.cssText='position:absolute;left:50%;top:50%;width:150px;height:96px;margin:-48px 0 0 -75px;border-radius:14px;background:#17171a;padding:5px;cursor:pointer;box-shadow:0 12px 26px rgba(0,0,0,.25)';
+  const scr=h('div',null,`<div style="position:absolute;left:8%;top:9%;font:700 9px Inter;color:#fff">안쪽</div><div style="position:absolute;right:8%;top:10%;width:30%;height:3px;background:#fff;border-radius:2px"></div><div style="position:absolute;left:34%;top:30%;width:32%;height:40%;border-radius:6px;background:#f5c76b"><div style="margin:18% auto;width:46%;height:40%;border-radius:3px;background:#3c7a6a"></div></div><div style="position:absolute;left:8%;bottom:12%;width:12px;height:12px;border-radius:50%;background:#7d9cff"></div><div style="position:absolute;right:-8%;bottom:-18%;width:32%;aspect-ratio:1;border-radius:50%;background:#e5c07b"></div>`,ph);
+  scr.style.cssText='position:relative;width:100%;height:100%;border-radius:10px;background:#283044;overflow:hidden';
+  const tip=h('div','tip','눌러 보세요',st);let inside=false,t0=-9,from=0,to=0,cur=0;
+  api.on(st,'click',e=>{if(!inside&&!ph.contains(e.target))return;inside=!inside;from=cur;to=inside?1:0;t0=performance.now()/1000;tip.textContent=inside?'다시 누르면 빠져나옵니다':'눌러 보세요'});
+  api.frame(s=>{const t=clamp((s-t0)/P.dur,0,1),e=P.over?backOut(P.over*2)(t):easeIO(t);cur=lerp(from,to,e);const W=st.clientWidth,H=st.clientHeight,z=Math.max(W/150,H/96)*1.04;
+    world.style.transform=`scale(${lerp(1,z,cur)})`;[...world.children].forEach(c=>{if(c!==ph)c.style.filter=`blur(${P.blur*clamp(cur,0,1)}px)`})})}});
+
+/* ───────── R 터지고 보상한다 ───────── */
+def({n:92,cat:'R',title:'색종이 터짐',hint:'완료 누르기',bg:'#f5f6f8',
+params:[['count','색종이 수',50,600,10,180,'장'],['power','퍼지는 힘',200,1500,20,700,''],['g','중력',200,2000,20,900,''],['spread','퍼짐 각도',20,180,5,70,'°']],
+spec:P=>`"완료" 버튼을 누르면 버튼이 체크 표시로 바뀌며 위쪽으로 {${P.spread}°} 부채꼴 안에 색종이 {${P.count}장}이 힘 {${P.power}}로 터져 나온다. 색종이는 팔랑이며 돌고, 중력 {${P.g}}로 천천히 떨어진다.`,
+mount(st,P,api){const c=api.canvas();const btn=h('button',null,'완료',st);btn.style.cssText='position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);z-index:3;border:0;border-radius:999px;background:#3e63f0;color:#fff;font:700 16px "Noto Sans KR";width:150px;height:52px;cursor:pointer;transition:width .3s,background .3s,transform .15s';
+  const C=['#e0573a','#f5c76b','#3e63f0','#2bb38a','#a35be6','#ff8fb1'];let F=[];
+  api.on(btn,'click',()=>{btn.style.transform='translate(-50%,-50%) scale(.92)';setTimeout(()=>btn.style.transform='translate(-50%,-50%)',140);const done=btn.textContent==='완료';btn.textContent=done?'✓':'완료';btn.style.width=done?'52px':'150px';btn.style.background=done?'#2bb38a':'#3e63f0';if(!done)return;
+    const r=btn.getBoundingClientRect(),s=st.getBoundingClientRect(),x=r.left+r.width/2-s.left,y=r.top-s.top+10;
+    for(let i=0;i<P.count;i++){const a=-Math.PI/2+rnd(-1,1)*P.spread/2*Math.PI/180,v=P.power*rnd(.4,1);F.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,r:rnd(0,TAU),vr:rnd(-12,12),w:rnd(6,11),h:rnd(3,6),c:C[i%C.length],ph:rnd(0,TAU),life:1})}});
+  api.frame((t,dt)=>{const g=c.ctx;g.clearRect(0,0,c.W,c.H);for(const p of F){p.vy+=P.g*dt;p.vx*=Math.pow(.25,dt);p.vy*=Math.pow(.6,dt);p.x+=(p.vx+Math.sin(t*6+p.ph)*30)*dt;p.y+=p.vy*dt;p.r+=p.vr*dt;if(p.y>c.H+20)p.life=0;
+    g.save();g.translate(p.x,p.y);g.rotate(p.r);g.scale(1,Math.cos(t*8+p.ph));g.fillStyle=p.c;g.fillRect(-p.w/2,-p.h/2,p.w,p.h);g.restore()}F=F.filter(p=>p.life>0)})}});
+
+def({n:93,cat:'R',title:'상자 열기',hint:'상자 누르기',dark:true,bg:'radial-gradient(ellipse at 50% 70%,#2a2350,#0f0d1d)',
+params:[['shake','흔들림 횟수',0,6,1,3,'번'],['pop','뚜껑 튀는 높이',40,200,5,110,'px'],['glow','빛 세기',0,1,0.05,0.8,''],['speed','속도 배율',0.5,2,0.05,1,'배']],
+spec:P=>`보라색 선물 상자를 누르면 {${P.shake}번} 좌우로 들썩이다가 뚜껑이 {${P.pop}px} 위로 튀어 올라 돌며 떨어지고, 상자 안에서 {${P.glow}} 세기의 빛줄기와 별이 솟는다. 전체 속도 {${P.speed}배}. 다시 누르면 닫힌다.`,
+mount(st,P,api){const wrap=h('div',null,null,st);wrap.style.cssText='position:absolute;left:50%;bottom:22%;width:130px;height:110px;margin-left:-65px;cursor:pointer';
+  const rays=h('div',null,null,st);rays.style.cssText='position:absolute;left:50%;bottom:30%;width:420px;height:420px;margin:0 0 -210px -210px;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,220,120,.35) 0 8deg,transparent 8deg 22deg);mask:radial-gradient(circle,#000 10%,transparent 65%);-webkit-mask:radial-gradient(circle,#000 10%,transparent 65%);opacity:0;transform:scale(.3)';
+  const star=h('div',null,'★',st);star.style.cssText='position:absolute;left:50%;bottom:28%;font-size:56px;color:#ffd45a;transform:translate(-50%,0) scale(0);text-shadow:0 0 20px #ffb300;pointer-events:none';
+  const body=h('div',null,'<i style="position:absolute;left:50%;top:0;bottom:0;width:18px;margin-left:-9px;background:#f5c443"></i>',wrap);body.style.cssText='position:absolute;left:6px;right:6px;bottom:0;height:72px;background:linear-gradient(#8a55f0,#6a35d6);border-radius:4px';
+  const lid=h('div',null,'<i style="position:absolute;left:50%;top:0;bottom:0;width:18px;margin-left:-9px;background:#f5c443"></i><i style="position:absolute;left:50%;top:-22px;width:46px;height:26px;margin-left:-23px;border:6px solid #f5c443;border-bottom:0;border-radius:23px 23px 0 0"></i>',wrap);
+  lid.style.cssText='position:absolute;left:0;right:0;bottom:66px;height:28px;background:linear-gradient(#9a68f5,#7a45e0);border-radius:5px;transform-origin:50% 100%';
+  const sh=h('div',null,null,st);sh.style.cssText='position:absolute;left:50%;bottom:20%;width:160px;height:14px;margin-left:-80px;border-radius:50%;background:rgba(0,0,0,.4)';h('div','tip','상자를 눌러 보세요',st);
+  let open=false,t0=-99;api.on(wrap,'click',()=>{open=!open;t0=performance.now()/1000});
+  api.frame(s=>{const t=(s-t0)*P.speed,ns=P.shake,sd=ns*.14;
+    if(open){const sk=t<sd?Math.sin(t/.14*Math.PI)*6*(1-t/sd):0;wrap.style.transform=`rotate(${sk}deg) translateY(${t<sd?-Math.abs(Math.sin(t/.14*Math.PI))*4:0}px)`;
+      const u=clamp((t-sd)/.9,0,1);if(t>sd){const y=-P.pop*Math.sin(u*Math.PI)*(1-u*.25)-u*40,x=u*90;lid.style.transform=`translate(${x}px,${Math.min(y+u*u*140,140)}px) rotate(${u*130}deg)`;lid.style.opacity=1-clamp((u-.8)*5,0,1)}else lid.style.transform='none';
+      const g=clamp((t-sd)/.5,0,1);rays.style.opacity=g*P.glow;rays.style.transform=`scale(${.3+g*.8}) rotate(${s*20}deg)`;star.style.transform=`translate(-50%,${-g*110}px) scale(${backOut(1.4)(g)})`;star.style.opacity=g}
+    else{wrap.style.transform='none';lid.style.transform='none';lid.style.opacity=1;rays.style.opacity=0;star.style.transform='translate(-50%,0) scale(0)'}})}});
+/* ───────── S 질감과 스타일 ───────── */
+def({n:94,cat:'S',title:'오려 붙인 콜라주',hint:'스크롤해 보기',bg:'#e9e1d3',
+params:[['rot','최대 기울기',0,30,1,12,'°'],['from','날아오는 거리',100,600,10,320,'px'],['jag','찢긴 가장자리',0,12,1,5,'px',{r:1}],['pieces','조각 수',4,14,1,8,'개',{r:1}]],
+spec:P=>`스크롤하면 찢긴 종이 조각 {${P.pieces}개}가 화면 밖 {${P.from}px} 거리에서 하나씩 날아와 최대 {${P.rot}°} 기울어진 채 탁 붙으며 "여름 스크랩" 콜라주가 완성된다. 조각 가장자리는 {${P.jag}px}씩 들쭉날쭉하게 찢겨 있다.`,
+mount(st,P,api){const s=api.scroll(5,'스크롤해 보세요 ⌄');const v=s.view;
+  h('div',null,'여름 스크랩',v).style.cssText='position:absolute;left:0;right:0;top:40%;text-align:center;font-size:clamp(30px,6vw,46px);font-weight:900;letter-spacing:-.03em;color:#2a2622;z-index:1';
+  const torn=(j)=>{const pts=[],n=14;const e=(a,b,fx)=>{for(let i=0;i<=n;i++){const t=i/n;pts.push(fx(t,rnd(-j,j)))}};e(0,0,(t,r)=>`${t*100}% ${Math.max(0,r)}px`);e(0,0,(t,r)=>`calc(100% - ${Math.max(0,r)}px) ${t*100}%`);e(0,0,(t,r)=>`${100-t*100}% calc(100% - ${Math.max(0,r)}px)`);e(0,0,(t,r)=>`${Math.max(0,r)}px ${100-t*100}%`);return`polygon(${pts.join(',')})`};
+  const C=['#e0573a','#f5c76b','#2f8f77','#3e63f0','#f2ebe0','#c2a4e8','#ff9f7a','#17171a','#9ad0c2','#f0d4a8','#6b4a7a','#e8e2d0','#d94f6a','#4a7a3e'];
+  const E=Array.from({length:P.pieces},(_,i)=>{const e=h('div',null,i%3==0?`<div style="position:absolute;inset:18%;border-radius:50%;background:rgba(255,255,255,.5)"></div>`:i%3==1?'<div style="position:absolute;left:12%;right:12%;top:20%;height:3px;background:rgba(0,0,0,.25);box-shadow:0 10px 0 rgba(0,0,0,.2),0 20px 0 rgba(0,0,0,.15)"></div>':'',v);
+    const w=rnd(70,150),hh=rnd(50,120),a=i/P.pieces*TAU+rnd(-.3,.3);e.style.cssText=`position:absolute;left:${50+Math.cos(a)*rnd(22,40)}%;top:${48+Math.sin(a)*rnd(20,36)}%;width:${w}px;height:${hh}px;margin:${-hh/2}px 0 0 ${-w/2}px;background:${C[i%C.length]};clip-path:${torn(P.jag)};filter:drop-shadow(0 3px 3px rgba(0,0,0,.25))`;
+    return{e,a,r:rnd(-1,1)}});
+  api.frame(()=>{const p=s.p(),n=E.length;E.forEach((o,i)=>{const t=clamp((p*1.25-i/n)*n/2.2,0,1),e=backOut(1.2)(t),d=P.from*(1-e);o.e.style.transform=`translate(${Math.cos(o.a)*d}px,${Math.sin(o.a)*d}px) rotate(${o.r*P.rot*(1+(1-e)*2)}deg) scale(${lerp(1.3,1,e)})`;o.e.style.opacity=t>0?1:0})})}});
+
+def({n:95,cat:'S',title:'픽셀 캐릭터 반복 동작',hint:'화면 누르기',dark:true,bg:'linear-gradient(#1b1640 0 60%,#2c2560 60% 72%,#2f5a2a 72%)',
+params:[['fps','프레임 속도',2,24,1,6,'fps'],['px','픽셀 크기',3,12,1,7,'px'],['sparks','마법 입자',0,60,1,22,'개'],['cast','마법 지속',0.3,3,0.1,1.2,'초']],
+spec:P=>`밤 들판에 선 픽셀 마법사가 {${P.fps}fps}로 두 프레임을 번갈아 숨 쉬듯 들썩인다. 화면을 누르면 지팡이를 치켜드는 프레임으로 바뀌어 {${P.cast}초} 동안 픽셀 입자 {${P.sparks}개}가 지팡이 끝에서 튄다. 픽셀 하나는 {${P.px}px}.`,
+mount(st,P,api){const c=api.canvas();st.style.cursor='pointer';h('div','tip','화면을 눌러 보세요',st);
+  const pal={'.':null,'h':'#6a4ac4','H':'#8a6ae0','y':'#f5d76e','s':'#f2c9a0','w':'#f4f4f4','b':'#3e5bd6','B':'#2c43a8','k':'#2a1c12','o':'#7a4a24','g':'#ffd23a','e':'#222'};
+  const base=['......hh........','.....hHHh.......','....hHHHHh......','...hHyHHHHh.....','..hhhhhhhhhh....','....ssssss......','....sesses......','....ssssss......','...wwwwwwww.....','...bwwwwwwb.....','..bbbwwwwbbb....','..bBbbbbbbBb....','..bBbbbbbbBb....','..bbbbbbbbbb....','...kk....kk.....','..kkk....kkk....'];
+  const staffA=[[11,6,'g'],[11,7,'o'],[11,8,'o'],[11,9,'o'],[11,10,'o'],[11,11,'o'],[11,12,'o'],[11,13,'o']],staffB=[[12,1,'g'],[12,2,'o'],[12,3,'o'],[12,4,'o'],[12,5,'o'],[12,6,'o'],[12,7,'o'],[11,8,'s']];
+  const stars=Array.from({length:30},()=>[Math.random(),Math.random()*.55,Math.random()]);let f=0,acc=0,castT=-9,S=[];
+  api.on(st,'pointerdown',()=>{castT=performance.now()/1000});
+  api.frame((t,dt)=>{const g=c.ctx,W=c.W,H=c.H,ps=P.px;acc+=dt;if(acc>1/P.fps){acc=0;f^=1}const casting=t-castT<P.cast;g.clearRect(0,0,W,H);
+    for(const [x,y,k] of stars){g.fillStyle=`rgba(255,255,230,${.4+.6*Math.abs(Math.sin(t*2+k*9))})`;g.fillRect((x*W)|0,(y*H)|0,3,3)}g.fillStyle='#f5e7a8';g.beginPath();g.arc(W*.8,H*.16,14,0,TAU);g.fill();g.fillStyle='#1b1640';g.beginPath();g.arc(W*.8+7,H*.16-4,13,0,TAU);g.fill();
+    const ox=Math.round(W/2-8*ps),oy=Math.round(H*.72-16*ps+(f&&!casting?ps:0));const draw=(x,y,col)=>{g.fillStyle=col;g.fillRect(ox+x*ps,oy+y*ps,ps,ps)};
+    base.forEach((row,y)=>[...row].forEach((ch,x)=>{const col=pal[ch];if(col)draw(x,y,col)}));(casting?staffB:staffA).forEach(([x,y,k])=>draw(x,y,pal[k]));
+    if(casting&&Math.random()<P.sparks*dt*3)for(let i=0;i<3;i++)S.push({x:ox+12.5*ps,y:oy+1.5*ps,vx:rnd(-120,120),vy:rnd(-160,20),l:1,c:['#ffd23a','#fff','#9ad7ff','#ff8fd1'][i]});
+    S=S.filter(p=>(p.l-=dt*1.3)>0);for(const p of S){p.vy+=200*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;g.fillStyle=p.c;g.globalAlpha=p.l;const q=Math.max(2,ps*.6|0);g.fillRect(Math.round(p.x/q)*q,Math.round(p.y/q)*q,q,q)}g.globalAlpha=1;
+    g.fillStyle='rgba(0,0,0,.25)';g.fillRect(ox+2*ps,Math.round(H*.72),11*ps,ps*.6)})}});
+
+def({n:96,cat:'S',title:'만화경 무늬',hint:'커서 움직이기',dark:true,bg:'#151320',
+params:[['seg','거울 조각 수',4,16,2,8,'조각'],['speed','회전 속도',0,2,0.05,0.3,''],['shapes','무늬 개수',3,20,1,8,'개'],['hue','색 이동',0,360,5,0,'°']],
+spec:P=>`원 안의 무늬가 {${P.seg}조각}의 거울로 반사되어 대칭 만화경을 이룬다. 무늬는 {${P.shapes}개}의 도형으로 커서 위치에 따라 모양과 거리가 바뀌고, 전체가 {${P.speed}} 속도로 천천히 돈다. 색은 {${P.hue}°}만큼 옮겨 쓴다.`,
+mount(st,P,api){const c=api.canvas();h('div','tip','커서를 움직여 보세요',st).style.color='#cbbfff';let mx=.5,my=.5,tx=.5,ty=.5;api.on(st,'pointermove',e=>{const p=api.pt(e);tx=p.x/p.w;ty=p.y/p.h});
+  const COL=['#ef6a45','#f5c76b','#2fb39a','#7d6cff','#ff8fb1','#f3f1ec'];
+  api.frame(t=>{const g=c.ctx,W=c.W,H=c.H,R=Math.min(W,H)*.44,n=P.seg,a=TAU/n;mx=lerp(mx,tx,.06);my=lerp(my,ty,.06);g.clearRect(0,0,W,H);
+    g.save();g.translate(W/2,H/2);g.rotate(t*P.speed);
+    for(let i=0;i<n;i++){g.save();g.rotate(i*a);if(i%2)g.scale(1,-1);g.beginPath();g.moveTo(0,0);g.arc(0,0,R,-a/2,a/2);g.closePath();g.clip();
+      for(let k=0;k<P.shapes;k++){const d=R*(.12+k/P.shapes*.85),off=Math.sin(t*.7+k+mx*4)*a*.35,sz=R*.06*(1+my*2)*(1+Math.sin(k*1.7));g.fillStyle=COL[k%COL.length];g.save();g.rotate(off);g.translate(d,0);g.rotate(t+k);g.filter=`hue-rotate(${P.hue}deg)`;
+        g.beginPath();if(k%3==0)g.arc(0,0,sz,0,TAU);else if(k%3==1){g.moveTo(0,-sz);g.lineTo(sz,sz);g.lineTo(-sz,sz);g.closePath()}else g.rect(-sz*.6,-sz*1.4,sz*1.2,sz*2.8);g.fill();g.restore()}g.filter='none';g.restore()}
+    g.restore();g.strokeStyle='#3a3460';g.lineWidth=6;g.beginPath();g.arc(W/2,H/2,R+4,0,TAU);g.stroke();g.fillStyle='#f3f1ec';g.beginPath();g.arc(W/2,H/2,R*.07,0,TAU);g.fill()})}});
+
+def({n:97,cat:'S',title:'소리 막대 반응',hint:'샘플 음악 · 내 음악 파일 · 마이크',dark:true,bg:'#141519',
+params:[['bars','막대 수',16,128,4,48,'개'],['smooth','부드러움',0,0.95,0.05,0.8,''],['gain','높이 배율',0.5,3,0.1,1.2,'배'],['style','모양',0,1,1,0,'',{L:['가로 막대','원형']}]],
+spec:P=>`소리를 고르면(샘플 음악·내 음악 파일·마이크) 주파수를 {${P.bars}개} 막대로 나눠 {${['가로 막대','원형'][P.style]}} 모양으로 보여 준다. 각 막대는 그 대역의 소리 크기에 {${P.gain}배}를 곱한 높이로 오르내리고, 부드러움 {${P.smooth}}로 출렁임이 다듬어진다. 소리가 없으면 한 줄 점선으로 쉰다.`,
+mount(st,P,api){const c=api.canvas();let ac=null,an=null,src=null,data=null,mode='',seq=null,el=null;
+  const bar=h('div',null,`<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button data-m="sample">샘플 음악 듣기</button><button data-m="file">내 음악 파일 열기</button><button data-m="mic">마이크 켜기</button></div><div class="msg" style="margin-top:8px;font-size:12px;opacity:.7">소리 하나를 골라 들어 보세요.</div><input type="file" accept="audio/*" hidden>`,st);
+  bar.style.cssText='position:absolute;left:0;right:0;bottom:14px;text-align:center;z-index:3';bar.querySelectorAll('button').forEach(b=>b.style.cssText='border:1px solid #5aa9ff;background:rgba(90,169,255,.08);color:#bfe0ff;border-radius:999px;padding:8px 14px;font:600 13px "Noto Sans KR";cursor:pointer');
+  const msg=bar.querySelector('.msg'),inp=bar.querySelector('input');
+  const ensure=async()=>{ac=ac||new (window.AudioContext||window.webkitAudioContext)();await ac.resume();if(!an){an=ac.createAnalyser();an.fftSize=512;data=new Uint8Array(an.frequencyBinCount)}};
+  const stop=()=>{try{seq&&clearInterval(seq);seq=null;src&&src.disconnect();if(el){el.pause();el=null}if(src&&src.mediaStream)src.mediaStream.getTracks().forEach(t=>t.stop())}catch(e){}src=null;mode=''};
+  api.clean(()=>{stop();try{ac&&ac.close()}catch(e){}});
+  const sample=()=>{const out=ac.createGain();out.gain.value=.25;out.connect(an);an.connect(ac.destination);src=out;const notes=[220,277.2,329.6,440,329.6,277.2,246.9,329.6];let i=0;
+    const play=()=>{const t=ac.currentTime,o=ac.createOscillator(),g=ac.createGain(),o2=ac.createOscillator(),g2=ac.createGain();o.type='triangle';o.frequency.value=notes[i%8]*(i%16<8?1:1.122);g.gain.setValueAtTime(.5,t);g.gain.exponentialRampToValueAtTime(.001,t+.45);o.connect(g).connect(out);o.start(t);o.stop(t+.5);
+      if(i%2==0){o2.frequency.setValueAtTime(110,t);o2.frequency.exponentialRampToValueAtTime(45,t+.2);g2.gain.setValueAtTime(.9,t);g2.gain.exponentialRampToValueAtTime(.001,t+.3);o2.connect(g2).connect(out);o2.start(t);o2.stop(t+.3)}i++};play();seq=setInterval(play,250)};
+  api.on(bar,'click',async e=>{const m=e.target.dataset&&e.target.dataset.m;if(!m)return;if(m==='file'){inp.click();return}stop();
+    try{await ensure();if(m==='sample'){sample();mode='sample';msg.textContent='샘플 음악 재생 중 · 다시 누르면 처음부터'}
+      else{const s=await navigator.mediaDevices.getUserMedia({audio:true});src=ac.createMediaStreamSource(s);src.mediaStream=s;try{an.disconnect()}catch(_){}src.connect(an);mode='mic';msg.textContent='마이크 듣는 중'}}
+    catch(err){msg.textContent=m==='mic'?'이 화면에서는 마이크를 쓸 수 없어요. 샘플 음악이나 내 음악 파일로 들어 보세요.':'소리를 켤 수 없었어요. 한 번 더 눌러 보세요.'}});
+  api.on(inp,'change',async()=>{const f=inp.files[0];if(!f)return;stop();try{await ensure();el=new Audio(URL.createObjectURL(f));el.loop=true;src=ac.createMediaElementSource(el);src.connect(an);an.connect(ac.destination);await el.play();mode='file';msg.textContent='재생 중: '+f.name}catch(err){msg.textContent='이 파일은 재생할 수 없어요.'}});
+  let vals=new Float32Array(128);
+  api.frame(t=>{const g=c.ctx,W=c.W,H=c.H,n=P.bars;if(an){an.smoothingTimeConstant=P.smooth;an.getByteFrequencyData(data)}g.clearRect(0,0,W,H);
+    for(let i=0;i<n;i++){const k=Math.floor(Math.pow(i/n,1.6)*(data?data.length*.7:1));const raw=mode&&data?data[k]/255:0;vals[i]=lerp(raw,vals[i],P.smooth*.6)}
+    const cy=H*.42;g.lineCap='round';
+    if(!mode){g.strokeStyle='#5aa9ff';g.setLineDash([8,6]);g.lineWidth=2;g.beginPath();g.moveTo(W*.08,cy);g.lineTo(W*.92,cy);g.stroke();g.setLineDash([]);return}
+    if(P.style==0){const bw=(W*.84)/n;for(let i=0;i<n;i++){const v=Math.min(1,vals[i]*P.gain),hh=Math.max(2,v*H*.34);g.fillStyle=`hsl(${200+i/n*120},90%,${55+v*20}%)`;g.fillRect(W*.08+i*bw+1,cy-hh,bw-2,hh*2)}}
+    else{const R=Math.min(W,H)*.16;for(let i=0;i<n;i++){const a=i/n*TAU-Math.PI/2,v=Math.min(1,vals[i]*P.gain),L=R+v*R*1.3;g.strokeStyle=`hsl(${200+i/n*120},90%,60%)`;g.lineWidth=Math.max(2,TAU*R/n*.6);g.beginPath();g.moveTo(W/2+Math.cos(a)*R,cy+Math.sin(a)*R);g.lineTo(W/2+Math.cos(a)*L,cy+Math.sin(a)*L);g.stroke()}}})}});
+
+build();
+}
+</script>
+</body>
+</html>
